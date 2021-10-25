@@ -48,11 +48,19 @@ final_df['time'] = matr
 
 #final_df.to_csv("matrix_Timer.csv")
 
+df=pd.read_csv('matrix_Timer.csv')
 
-plt.plot(matr, label ='const')
+
+
+
+plt.plot(df['time'], label ='const')
 
 #theoretical times
 
 
+
+
+A = np.random.random((3, 3))
+B = np.random.random((3, 3))
 
 

@@ -127,173 +127,9 @@ def tim_sort(lst):
 
 
 
-n_num=[]
-const1 = []
-sum2 = []
-prod3 = []
-polin4 = []
-polin_horn4 = []
-bub_sort5 = []
-quick_sort6 = []
-timsort7 = []
 
 
-for n in range(1,2000):
-    #print(n)
-    vec = np.random.rand(n).tolist()
-    n_num.append(n)
-
-
-    #const
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        constant(vec)
-        t1 = time()
-        temp.append(t1-t0)
-    const1.append(np.mean(temp))
-
-    #sum
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        sum(vec)
-        t1 = time()
-        temp.append(t1-t0)
-    sum2.append(np.mean(temp))
-
-    #prod
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        prod(vec)
-        t1 = time()
-        temp.append(t1-t0)
-    prod3.append(np.mean(temp))
-
-    #polin
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        poly(vec, 1.5)
-        t1 = time()
-        temp.append(t1-t0)
-    polin4.append(np.mean(temp))
-
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        poly_horner(vec, 1.5)
-        t1 = time()
-        temp.append(t1-t0)
-    polin_horn4.append(np.mean(temp))
-
-
-    #bubble sort
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        bubble_sort(vec)
-        t1 = time()
-        temp.append(t1-t0)
-    bub_sort5.append(np.mean(temp))
-
-    #Quick Sort
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        quick_sort(vec)
-        t1 = time()
-        temp.append(t1-t0)
-    quick_sort6.append(np.mean(temp))
-
-    #timsort
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        tim_sort(vec)
-        t1 = time()
-        temp.append(t1-t0)
-    timsort7.append(np.mean(temp))
-
-
-const1 = []
-sum2 = []
-prod3 = []
-polin4 = []
-polin_horn4 = []
-bub_sort5 = []
-quick_sort6 = []
-timsort7 = []
-
-plt.plot(const1, label ='const')
-plt.plot(sum2, label ='sum')
-plt.plot(prod3,label = 'prod')
-plt.plot(polin4,label = 'polin')
-plt.plot(polin_horn4,label = 'polin_horn')
-plt.plot(bub_sort5,label = 'bub_sort')
-plt.plot(quick_sort6,label = 'quick_sort')
-plt.plot(timsort7,label = 'timsort')
-
-plt.plot(polin4,label = 'polin')
-
-plt.legend()
-plt.show()
-
-final_df = pd.DataFrame()
-final_df['n'] = n_num
-final_df['const'] = const1
-final_df['sum'] = sum2
-final_df['prod'] = prod3
-final_df['polin'] = polin4
-final_df['polin_horn'] = polin_horn4
-final_df['bub_sort'] = bub_sort5
-final_df['quick_sort'] = quick_sort6
-final_df['timsort'] = timsort7
-
-#final_df.to_csv("sorting_values.csv")
-
-df=pd.read_csv('sorting_values.csv')
-
-plt.plot(df['polin'],label = 'polin')
-plt.plot(df['sum'], label ='sum')
-
-plt.legend()
-plt.show()
-
-
-n_num=[]
-sum1 = []
-sum2 = []
-sum3 = []
-
-for n in range(1,2000):
-    #print(n)
-    vec = np.random.rand(n).tolist()
-    n_num.append(n)
-
-
-    #sum
-    temp = []
-    for i in range(0,5):
-        t0 = time()
-        sum(vec)
-        t1 = time()
-        temp.append(t1-t0)
-    sum1.append(np.mean(temp))
-
-    temp = []
-    for i in range(0,5):
-        t = Timer(functools.partial(sum,vec))  
-        time_cool = t.timeit(1)
-        temp.append(time_cool)
-    sum2.append(np.mean(temp))
-
-    t = Timer(functools.partial(sum,vec))  
-    time_cool = t.timeit(5)/5
-    sum3.append(time_cool)
-
-
+df=pd.read_csv('sorting_values_Timer.csv')
 
 
 
@@ -379,18 +215,22 @@ final_df['timsort'] = timsort7
 
 
 
-plt.plot(const1, label ='const')
-plt.plot(sum2, label ='sum')
-plt.plot(prod3,label = 'prod')
-plt.plot(polin4,label = 'polin')
-plt.plot(polin_horn4,label = 'polin_horn')
+plt.plot(df['const'], label ='const')
+plt.plot(df['prod'],label = 'prod')
+plt.plot(df['polin'],label = 'polin')
 plt.plot(df['polin_horn'],label = 'polin_horn')
+plt.plot(df['bub_sort'],label = 'bub_sort')
+plt.plot(df['quick_sort'],label = 'quick_sort')
+plt.plot(df['timsort'],label = 'timsort')
 
-plt.plot(bub_sort5,label = 'bub_sort')
-plt.plot(quick_sort6,label = 'quick_sort')
-plt.plot(timsort7,label = 'timsort')
 
-plt.plot(polin4,label = 'polin')
+plt.plot(final_df['bub_sort'],label = 'bub_sort')
+plt.plot(final_df['quick_sort'],label = 'quick_sort')
+plt.plot(final_df['timsort'],label = 'timsort')
+
 
 plt.legend()
 plt.show()
+
+
+#Theoretical
