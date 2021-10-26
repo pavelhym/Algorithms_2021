@@ -51,80 +51,102 @@ def bubble_sort(collection):
 
 
 
-def quick_sort(collection: list) -> list:
-    if len(collection) < 2:
-        return collection
-    pivot = collection.pop()  # Use the last element as the first pivot
-    greater: list[int] = []  # All elements greater than pivot
-    lesser: list[int] = []  # All elements less than or equal to pivot
-    for element in collection:
-        (greater if element > pivot else lesser).append(element)
-    return quick_sort(lesser) + [pivot] + quick_sort(greater)
+def quick_sort(array=[12,4,5,6,7,3,1,15]):
+    """Sort the array by using quicksort."""
 
+    less = []
+    equal = []
+    greater = []
 
+    if len(array) > 1:
+        pivot = array[0]
+        for x in array:
+            if x < pivot:
+                less.append(x)
+            elif x == pivot:
+                equal.append(x)
+            elif x > pivot:
+                greater.append(x)
+        # Don't forget to return something!
+        return quick_sort2(less)+equal+quick_sort2(greater)  # Just use the + operator to join lists
+    # Note that you want equal ^^^^^ not pivot
+    else:  # You need to handle the part at the end of the recursion - when you only have one element in your array, just return the array.
+        return array
 
-def binary_search(lst, item, start, end):
-    if start == end:
-        return start if lst[start] > item else start + 1
-    if start > end:
-        return start
-
-    mid = (start + end) // 2
-    if lst[mid] < item:
-        return binary_search(lst, item, mid + 1, end)
-    elif lst[mid] > item:
-        return binary_search(lst, item, start, mid - 1)
-    else:
-        return mid
-
-
-def insertion_sort(lst):
-    length = len(lst)
-
-    for index in range(1, length):
-        value = lst[index]
-        pos = binary_search(lst, value, 0, index - 1)
-        lst = lst[:pos] + [value] + lst[pos:index] + lst[index + 1 :]
-
-    return lst
-
-
-def merge(left, right):
-    if not left:
-        return right
-
-    if not right:
-        return left
-
-    if left[0] < right[0]:
-        return [left[0]] + merge(left[1:], right)
-
-    return [right[0]] + merge(left, right[1:])
-
-
-def tim_sort(lst):
-
-    length = len(lst)
-    runs, sorted_runs = [], []
-    new_run = [lst[0]]
-    sorted_array = []
-    i = 1
-    while i < length:
-        if lst[i] < lst[i - 1]:
-            runs.append(new_run)
-            new_run = [lst[i]]
-        else:
-            new_run.append(lst[i])
+MINIMUM= 32
+  
+def find_minrun(n): 
+  
+    r = 0
+    while n >= MINIMUM: 
+        r |= n & 1
+        n >>= 1
+    return n + r 
+  
+def insertion_sort(array, left, right): 
+    for i in range(left+1,right+1):
+        element = array[i]
+        j = i-1
+        while element<array[j] and j>=left :
+            array[j+1] = array[j]
+            j -= 1
+        array[j+1] = element
+    return array
+              
+def merge(array, l, m, r): 
+  
+    array_length1= m - l + 1
+    array_length2 = r - m 
+    left = []
+    right = []
+    for i in range(0, array_length1): 
+        left.append(array[l + i]) 
+    for i in range(0, array_length2): 
+        right.append(array[m + 1 + i]) 
+  
+    i=0
+    j=0
+    k=l
+   
+    while j < array_length2 and  i < array_length1: 
+        if left[i] <= right[j]: 
+            array[k] = left[i] 
+            i += 1
+  
+        else: 
+            array[k] = right[j] 
+            j += 1
+  
+        k += 1
+  
+    while i < array_length1: 
+        array[k] = left[i] 
+        k += 1
         i += 1
-    runs.append(new_run)
-
-    for run in runs:
-        sorted_runs.append(insertion_sort(run))
-    for run in sorted_runs:
-        sorted_array = merge(sorted_array, run)
-
-    return sorted_array
-
+  
+    while j < array_length2: 
+        array[k] = right[j] 
+        k += 1
+        j += 1
+  
+def tim_sort(array): 
+    n = len(array) 
+    minrun = find_minrun(n) 
+  
+    for start in range(0, n, minrun): 
+        end = min(start + minrun - 1, n - 1) 
+        insertion_sort(array, start, end) 
+   
+    size = minrun 
+    while size < n: 
+  
+        for left in range(0, n, 2 * size): 
+  
+            mid = min(n - 1, left + size - 1) 
+            right = min((left + 2 * size - 1), (n - 1)) 
+            merge(array, left, mid, right) 
+  
+        size = 2 * size 
 
 
 
@@ -150,53 +172,84 @@ quick_sort6 = []
 timsort7 = []
 
 
-for n in range(1,2000):
-    #print(n)
-    vec = np.random.rand(n).tolist()
+for n in range(1,2001):
+    print(n)
+    #vec = np.random.rand(n).tolist()
     n_num.append(n)
 
 
 
     #const
-    t = Timer(functools.partial(constant,vec))  
-    time_eval = t.timeit(5)/5
-    const1.append(time_eval)
+    temp = []
+    for i in range(0,5):
+        vec = np.random.rand(n).tolist()
+        t = Timer(functools.partial(constant,vec))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    const1.append(np.mean(temp))
 
     #sum
-    t = Timer(functools.partial(sum,vec))  
-    time_eval = t.timeit(5)/5
-    sum2.append(time_eval)
+    temp = []
+    for i in range(0,5):
+        vec = np.random.rand(n).tolist()
+        t = Timer(functools.partial(sum,vec))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    sum2.append(np.mean(temp))
 
     #prod
-
-    t = Timer(functools.partial(prod,vec))  
-    time_eval = t.timeit(5)/5
-    prod3.append(time_eval)
+    temp = []
+    for i in range(0,5):
+        vec = np.random.rand(n).tolist()
+        t = Timer(functools.partial(prod,vec))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    prod3.append(np.mean(temp))
 
     #polin
-    t = Timer(functools.partial(poly,vec,1.5))  
-    time_eval = t.timeit(5)/5
-    polin4.append(time_eval)
+    temp = []
+    for i in range(0,5):
+        vec = np.random.rand(n).tolist()
+        t = Timer(functools.partial(poly,vec,1.5))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    polin4.append(np.mean(temp))
 
-    t = Timer(functools.partial(poly_horner,vec,1.5))  
-    time_eval = t.timeit(5)/5
-    polin_horn4.append(time_eval)
+    temp = []
+    for i in range(0,5):
+        vec = np.random.rand(n).tolist()
+        t = Timer(functools.partial(poly_horner,vec,1.5))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    polin_horn4.append(np.mean(temp))
 
 
     #bubble sort
-    t = Timer(functools.partial(bubble_sort,vec))  
-    time_eval = t.timeit(5)/5
-    bub_sort5.append(time_eval)
+    temp = []
+    for i in range(0,5):
+        vec = np.random.rand(n).tolist()
+        t = Timer(functools.partial(bubble_sort,vec))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    bub_sort5.append(np.mean(temp))
 
     #Quick Sort
-    t = Timer(functools.partial(quick_sort,vec))  
-    time_eval = t.timeit(5)/5
-    quick_sort6.append(time_eval)
+    temp = []
+    for i in range(0,5):
+        vec = np.random.rand(n).tolist()
+        t = Timer(functools.partial(quick_sort,vec))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    quick_sort6.append(np.mean(temp))
 
     #timsort
-    t = Timer(functools.partial(tim_sort,vec))  
-    time_eval = t.timeit(5)/5
-    timsort7.append(time_eval)
+    temp = []
+    for i in range(0,5):
+        vec = np.random.rand(n).tolist()
+        t = Timer(functools.partial(tim_sort,vec))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    timsort7.append(np.mean(temp))
 
 
 
@@ -211,26 +264,186 @@ final_df['bub_sort'] = bub_sort5
 final_df['quick_sort'] = quick_sort6
 final_df['timsort'] = timsort7
 
-#final_df.to_csv("sorting_values_Timer.csv")
+#final_df.to_csv("final_sorting_values_Timer.csv")
+
+final_df = pd.read_csv("final_sorting_values_Timer.csv")
 
 
-
-plt.plot(df['const'], label ='const')
-plt.plot(df['prod'],label = 'prod')
-plt.plot(df['polin'],label = 'polin')
-plt.plot(df['polin_horn'],label = 'polin_horn')
-plt.plot(df['bub_sort'],label = 'bub_sort')
-plt.plot(df['quick_sort'],label = 'quick_sort')
-plt.plot(df['timsort'],label = 'timsort')
-
-
+plt.plot(final_df['const'], label ='const')
+plt.plot(final_df['prod'],label = 'prod')
+plt.plot(final_df['polin'],label = 'polin')
+plt.plot(final_df['polin_horn'],label = 'polin_horn')
 plt.plot(final_df['bub_sort'],label = 'bub_sort')
 plt.plot(final_df['quick_sort'],label = 'quick_sort')
 plt.plot(final_df['timsort'],label = 'timsort')
 
+plt.legend()
+plt.show()
 
+df=final_df
+
+#Theoretical
+
+#const - const
+
+df['const'].tolist()[-1] / 2000
+theoretical_const = []
+for n in range(0,2001):
+    theoretical_const.append(df['const'].tolist()[-1])
+
+plt.plot(df['const'], label ='const')
+plt.plot(theoretical_const, label ='const_theor')
 plt.legend()
 plt.show()
 
 
-#Theoretical
+#prod 
+#O(n)
+df['prod'].tolist()[-1] / 2000
+
+theoretical_prod = []
+for n in range(0,2001):
+    theoretical_prod.append(df['prod'].tolist()[-1]/2000 *n )
+
+plt.plot(df['prod'], label ='prod')
+plt.plot(theoretical_prod, label ='prod_theor')
+plt.legend()
+plt.show()
+
+
+#polin
+#mb O(n)
+
+theoretical_polin = []
+for n in range(0,2001):
+    theoretical_polin.append(df['polin'].tolist()[-1]/2000 *n )
+
+plt.plot(df['polin'], label ='polin')
+plt.plot(theoretical_polin, label ='polin_theor')
+plt.legend()
+plt.show()
+
+
+#polin horn
+
+theoretical_polin_horn = []
+for n in range(0,2001):
+    theoretical_polin_horn.append(df['polin_horn'].tolist()[-1]/2000 *n )
+
+plt.plot(df['polin_horn'], label ='polin_horn')
+plt.plot(theoretical_polin_horn, label ='polin_horn_theor')
+plt.legend()
+plt.show()
+
+#bub_sort
+#O(n**2)
+
+theoretical_bub_sort = []
+for n in range(0,2001):
+    #theoretical_bub_sort.append(df['bub_sort'].tolist()[-1]/(1999*np.log(1999)) *n*np.log(n) )
+    theoretical_bub_sort.append(df['bub_sort'].tolist()[-1]/2000**2 * n**2 )
+plt.plot(df['bub_sort'], label ='bub_sort')
+plt.plot(theoretical_bub_sort, label ='bub_sort_theor')
+plt.legend()
+plt.show()
+
+
+
+#quick_sort
+#O(nlogn)
+theoretical_quick_sort = []
+for n in range(0,2001):
+    theoretical_quick_sort.append(df['quick_sort'].tolist()[-1]/(2000*np.log(2000)) *n*np.log(n) )
+    #theoretical_quick_sort.append(df['quick_sort'].tolist()[-1]/2000**2 * n**2 )
+plt.plot(df['quick_sort'], label ='quick_sort')
+plt.plot(theoretical_quick_sort, label ='quick_sort_theor')
+plt.legend()
+plt.show()
+
+
+
+#timsort 
+
+
+theoretical_timsort = []
+for n in range(0,2000):
+    theoretical_timsort.append(df['timsort'].tolist()[-2]/(2000*np.log(2000)) *n*np.log(n) )
+    #theoretical_timsort.append(df['timsort'].tolist()[-1]/1999**2 * n**2 )
+plt.plot(df['timsort'], label ='tim_sort')
+plt.plot(theoretical_timsort, label ='tim_sort_theor')
+plt.legend()
+plt.show()
+
+
+
+
+
+##3
+
+def product(A,B):
+    shape = len(A)
+    result = np.zeros((shape,shape))
+    for i in range(len(A)):
+
+        # iterating by column by B
+        for j in range(len(B[0])):
+        
+            # iterating by rows of B
+            for k in range(len(B)):
+                result[i][j] += A[i][k] * B[k][j]
+
+
+
+
+
+n_num = []
+matr = []
+
+for n in range(1,501,10):
+    n_num.append(n)
+    print(n)
+
+    result = np.zeros((n,n))
+    
+    temp = []
+    for i in range(0,5): 
+        A = np.random.random((n, n))
+        B = np.random.random((n, n))   
+        t = Timer(functools.partial(product,A,B))  
+        time_eval = t.timeit(1)
+        temp.append(time_eval)
+    matr.append(np.mean(temp))
+
+
+final_df = pd.DataFrame()
+final_df['n'] = n_num
+final_df['time'] = matr
+
+#final_df.to_csv("matrix_Timer.csv")
+
+df=pd.read_csv('matrix_Timer.csv')
+
+#theoretical times
+
+
+
+
+#O(n**3)
+theoretical_product = []
+for n in range(1,500,10):
+    theoretical_product.append(df['time'].tolist()[-1]/(500**3) *n**3 )
+    #theoretical_quick_sort.append(df['quick_sort'].tolist()[-1]/2000**2 * n**2 )
+plt.plot(df['n'],df['time'], label ='matr_prod')
+plt.plot(df['n'],theoretical_product, label ='matr_prod_theor')
+plt.legend()
+plt.show()
+
+
+
+
+  
+  
+  
+  
+  
+  

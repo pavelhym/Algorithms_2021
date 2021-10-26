@@ -24,7 +24,7 @@ def product(A,B):
 
 matr = []
 
-for n in range(1,500,10):
+for n in range(1,501,10):
 
     print(n)
     A = np.random.random((n, n))
@@ -60,7 +60,15 @@ plt.plot(df['time'], label ='const')
 
 
 
-A = np.random.random((3, 3))
-B = np.random.random((3, 3))
+#O(n**3)
+theoretical_product = []
+for n in range(1,500,10):
+    theoretical_product.append(df['time'].tolist()[-1]/(500**3) *n**3 )
+    #theoretical_quick_sort.append(df['quick_sort'].tolist()[-1]/2000**2 * n**2 )
+plt.plot(df['time'], label ='matr_prod')
+plt.plot(theoretical_product, label ='matr_prod_theor')
+plt.legend()
+plt.show()
+
 
 
