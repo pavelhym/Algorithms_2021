@@ -49,65 +49,6 @@ def bruteforce(fx,a,b,eps):
             x_min = x_k 
     return   x_min, f_x_min, iter, f_calc
 
-bruteforce(f1,0,1,eps)
-
-#1)
-
-
-print("Number of iterations brute force 1st = " + str(bruteforce(f1,0,1,eps)[2]))
-print("Number of f calc brute force 1st = " + str(bruteforce(f1,0,1,eps)[3]))
-
-graph_first = []
-scale1 = []
-for i in range(0,1000):
-    graph_first.append((i/1000)**3)
-    scale1.append(i/1000)
-
-
-plt.plot(scale1,graph_first,label='function')
-plt.plot(bruteforce(f1,0,1,eps)[0],bruteforce(f1,0,1,eps)[1],'ro',label = "bruteforce") 
-plt.title("Brute force first")
-plt.legend()
-plt.show()
-
-#2)
-
-
-print("Number of iterations brute force 2nd = " + str(bruteforce(f2,0,1,eps)[2]))
-print("Number of f calc brute force 2nd = " + str(bruteforce(f2,0,1,eps)[2]))
-
-
-graph_second = []
-scale2 = []
-for i in range(0,1000):
-    graph_second.append(abs(i/1000-0.2))
-    scale2.append(i/1000)
-
-plt.plot(scale2,graph_second,label='function')
-plt.plot(bruteforce(f2,0,1,eps)[0],bruteforce(f2,0,1,eps)[1],'ro',label = "bruteforce") 
-plt.title("Brute force second")
-plt.legend()
-plt.show()
-
-#3)
-
-
-print("Number of iterations brute force 3rd = " + str(bruteforce(f3,0.01,1,eps)[2]))
-print("Number of f calc brute force 3rd = " + str(bruteforce(f3,0.01,1,eps)[3]))
-
-
-graph_third = []
-scale3 = []
-for i in range(10,1000):
-    i = i/1000
-    graph_third.append(i*np.sin(1/i))
-    scale3.append(i)
-
-plt.plot(scale3,graph_third,label='function')
-plt.plot(bruteforce(f3,0.01,1,eps)[0],bruteforce(f3,0.01,1,eps)[1],'ro',label = "bruteforce") 
-plt.title("Brute force third")
-plt.legend()
-plt.show()
 
 
 
@@ -140,38 +81,6 @@ def dichotomy(fx,a,b,eps):
     x_min_dic1 = (b_1 + a_1)/2
     f_x_min_dic1 = fx(x_min_dic1)
     return x_min_dic1, f_x_min_dic1, iter_dic1, f_calc_dic1
-
-
-print("Number of iterations Dichotomy 1st = " + str(dichotomy(f1,0,1,eps)[2]))
-print("Number of f calc Dichotomy 1st = " + str(dichotomy(f1,0,1,eps)[3]))
-
-plt.plot(scale1,graph_first,label='function')
-plt.plot(dichotomy(f1,0,1,eps)[0],dichotomy(f1,0,1,eps)[1],'ro',label = "Dichotomy") 
-plt.title("Dichotomy first")
-plt.legend()
-plt.show()
-
-
-
-print("Number of iterations Dichotomy 2nd = " + str(dichotomy(f2,0,1,eps)[2]))
-print("Number of f calc Dichotomy 2nd = " + str(dichotomy(f2,0,1,eps)[3]))
-
-plt.plot(scale2,graph_second,label='function')
-plt.plot(dichotomy(f2,0,1,eps)[0],dichotomy(f2,0,1,eps)[1],'ro',label = "Dichotomy") 
-plt.title("Dichotomy second")
-plt.legend()
-plt.show()
-
-
-print("Number of iterations Dichotomy 3rd = " + str(dichotomy(f3,0,1,eps)[2]))
-print("Number of f calc Dichotomy 3rd = " + str(dichotomy(f3,0,1,eps)[3]))
-
-
-plt.plot(scale3,graph_third,label='function')
-plt.plot(dichotomy(f3,0.01,1,eps)[0],dichotomy(f3,0.01,1,eps)[1],'ro',label = "Dichotomy") 
-plt.title("Dichotomy third")
-plt.legend()
-plt.show()
 
 
 #Golden section
@@ -210,42 +119,149 @@ def golden_section(fx,a,b,eps):
     return x_min_gold, f_x_min_gold, iter, f_calc
 
 
+
+
+
+
+#Results for 1_1
+
+print("x_min brute force 1st = " + str(bruteforce(f1,0,1,eps)[0]))
+print("f_min brute force 1st = " + str(bruteforce(f1,0,1,eps)[1]))
+print("Number of iterations brute force 1st = " + str(bruteforce(f1,0,1,eps)[2]))
+print("Number of f calc brute force 1st = " + str(bruteforce(f1,0,1,eps)[3]))
+
+print("x_min Dichotomy 1st = " + str(dichotomy(f1,0,1,eps)[0]))
+print("f_min  Dichotomy 1st = " + str(dichotomy(f1,0,1,eps)[1]))
+print("Number of iterations Dichotomy 1st = " + str(dichotomy(f1,0,1,eps)[2]))
+print("Number of f calc Dichotomy 1st = " + str(dichotomy(f1,0,1,eps)[3]))
+
+print("x_min Golden section 1st = " + str(golden_section(f1,0,1,eps)[0]))
+print("f_min Golden Section 1st = " + str(golden_section(f1,0,1,eps)[1]))
 print("Number of iterations Golden section 1st = " + str(golden_section(f1,0,1,eps)[2]))
 print("Number of f calc Golden Section 1st = " + str(golden_section(f1,0,1,eps)[3]))
 
-plt.plot(scale1,graph_first,label='function')
-plt.plot(golden_section(f1,0,1,eps)[0],golden_section(f1,0,1,eps)[1],'ro',label = "Golden Section") 
-plt.title("Golden Section first")
+
+
+graph_first = []
+scale1 = []
+for i in range(0,1000):
+    graph_first.append((i/1000)**3)
+    scale1.append(i/1000)
+
+
+plt.plot(scale1[0:10],graph_first[0:10],label='x**3')
+plt.plot(bruteforce(f1,0,1,eps)[0],bruteforce(f1,0,1,eps)[1],'ro',label = "bruteforce") 
+plt.plot(dichotomy(f1,0,1,eps)[0],dichotomy(f1,0,1,eps)[1],'bo',label = "dichotomy") 
+plt.plot(golden_section(f1,0,1,eps)[0],golden_section(f1,0,1,eps)[1],'go',label = "golden_section") 
+plt.title("Algoritms comparison")
 plt.legend()
+plt.savefig('Plots\comp_1_1.png')
 plt.show()
 
 
+#Results for 1_2
 
+print("x_min brute force 2nd = " + str(bruteforce(f2,0,1,eps)[0]))
+print("f_min brute force 2nd = " + str(bruteforce(f2,0,1,eps)[1]))
+print("Number of iterations brute force 2nd = " + str(bruteforce(f2,0,1,eps)[2]))
+print("Number of f calc brute force 2nd = " + str(bruteforce(f2,0,1,eps)[3]))
+
+
+print("x_min Dichotomy 2nd = " + str(dichotomy(f2,0,1,eps)[0]))
+print("f_min Dichotomy 2nd = " + str(dichotomy(f2,0,1,eps)[1]))
+print("Number of iterations Dichotomy 2nd = " + str(dichotomy(f2,0,1,eps)[2]))
+print("Number of f calc Dichotomy 2nd = " + str(dichotomy(f2,0,1,eps)[3]))
+
+print("x_min Golden section 2nd = " + str(golden_section(f2,0,1,eps)[0]))
+print("f_min Golden section 2nd = " + str(golden_section(f2,0,1,eps)[1]))
 print("Number of iterations Golden section 2nd = " + str(golden_section(f2,0,1,eps)[2]))
 print("Number of f calc Golden section 2nd = " + str(golden_section(f2,0,1,eps)[3]))
 
-plt.plot(scale2,graph_second,label='function')
-plt.plot(golden_section(f2,0,1,eps)[0],golden_section(f2,0,1,eps)[1],'ro',label = "Golden Section") 
-plt.title("Golden Section second")
+graph_second = []
+scale2 = []
+for i in range(0,1000):
+    graph_second.append(abs(i/1000-0.2))
+    scale2.append(i/1000)
+
+plt.plot(scale2[199:202],graph_second[199:202],label='|x-0.2|')
+plt.plot(bruteforce(f2,0,1,eps)[0],bruteforce(f2,0,1,eps)[1],'ro',label = "bruteforce") 
+plt.plot(dichotomy(f2,0,1,eps)[0],dichotomy(f2,0,1,eps)[1],'bo',label = "dichotomy") 
+plt.plot(golden_section(f2,0,1,eps)[0],golden_section(f2,0,1,eps)[1],'go',label = "golden_section") 
+plt.title("Algoritms comparison")
 plt.legend()
+plt.savefig('Plots\comp_1_2.png')
 plt.show()
 
 
-print("Number of iterations Golden Section 3rd = " + str(golden_section(f3,0,1,eps)[2]))
-print("Number of f calc Golden Section 3rd = " + str(golden_section(f3,0,1,eps)[3]))
+#Results for 1_3
 
 
-plt.plot(scale3,graph_third,label='function')
-plt.plot(golden_section(f3,0.01,1,eps)[0],golden_section(f3,0.01,1,eps)[1],'ro',label = "Golden Section") 
-plt.title("Golden Section third")
+print("x_min brute force 3rd = " + str(bruteforce(f3,0.01,1,eps)[0]))
+print("f_min brute force 3rd = " + str(bruteforce(f3,0.01,1,eps)[1]))
+print("Number of iterations brute force 3rd = " + str(bruteforce(f3,0.01,1,eps)[2]))
+print("Number of f calc brute force 3rd = " + str(bruteforce(f3,0.01,1,eps)[3]))
+
+
+print("x_min Dichotomy 3rd = " + str(dichotomy(f3,0.01,1,eps)[0]))
+print("f_min Dichotomy 3rd = " + str(dichotomy(f3,0.01,1,eps)[1]))
+print("Number of iterations Dichotomy 3rd = " + str(dichotomy(f3,0.01,1,eps)[2]))
+print("Number of f calc Dichotomy 3rd = " + str(dichotomy(f3,0.01,1,eps)[3]))
+
+print("x_min Golden section 3rd = " + str(golden_section(f3,0.01,1,eps)[0]))
+print("f_min Golden section 3rd = " + str(golden_section(f3,0.01,1,eps)[1]))
+print("Number of iterations Golden section 3rd = " + str(golden_section(f3,0.01,1,eps)[2]))
+print("Number of f calc Golden section 3rd = " + str(golden_section(f3,0.01,1,eps)[3]))
+
+
+
+graph_third = []
+scale3 = []
+for i in range(10,1000):
+    i = i/1000
+    graph_third.append(i*np.sin(1/i))
+    scale3.append(i)
+
+plt.plot(scale3,graph_third,label='x sin(1/x)')
+plt.plot(bruteforce(f3,0.01,1,eps)[0],bruteforce(f3,0.01,1,eps)[1],'ro',label = "bruteforce") 
+plt.plot(dichotomy(f3,0.01,1,eps)[0],dichotomy(f3,0.01,1,eps)[1],'bo',label = "dichotomy") 
+plt.plot(golden_section(f3,0.01,1,eps)[0],golden_section(f3,0.01,1,eps)[1],'go',label = "golden_section") 
+plt.title("Algoritms comparison")
 plt.legend()
+plt.savefig('Plots\comp_1_3_first.png')
 plt.show()
 
+
+
+plt.plot(scale3[211:218],graph_third[211:218],label='x sin(1/x)')
+plt.plot(bruteforce(f3,0.01,1,eps)[0],bruteforce(f3,0.01,1,eps)[1],'ro',label = "bruteforce") 
+plt.plot(dichotomy(f3,0.01,1,eps)[0],dichotomy(f3,0.01,1,eps)[1],'bo',label = "dichotomy") 
+plt.plot(golden_section(f3,0.01,1,eps)[0],golden_section(f3,0.01,1,eps)[1],'go',label = "golden_section") 
+plt.title("Algoritms comparison")
+plt.legend()
+plt.savefig('Plots\comp_1_3_second.png')
+plt.show()
 
 
 
 #2
+
+#initialize data
+alpha_real,beta_real = np.random.rand(2)
+
+y_k = []
+x_k = []
+for k in range(0,101):
+    x_k.append(k/100)
+    y_k.append(alpha_real*k/100 + beta_real)
+    #np.random.normal(loc=0,scale= 1, size=1)[0]
+
+
+
 #BRUTEFORCE
+
+
+
+
 
 def f12(y_k ,x_list ,var1,var2):
     #print(y_k)
@@ -267,15 +283,7 @@ def f22(y_k ,x_list ,var1,var2):
 
 
 
-alpha_real,beta_real = np.random.rand(2)
 
-
-y_k = []
-x_k = []
-for k in range(0,101):
-    x_k.append(k/100)
-    y_k.append(alpha_real*k/100 + beta_real)
-    #np.random.normal(loc=0,scale= 1, size=1)[0]
 
 
 
