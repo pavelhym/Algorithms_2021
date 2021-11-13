@@ -247,14 +247,32 @@ plt.show()
 
 #initialize data
 alpha_real,beta_real = np.random.rand(2)
+alpha_real,beta_real = 0.6236249972188823 , 0.8160876383416222
 
+y_k_real = []
 y_k = []
 x_k = []
 for k in range(0,101):
     x_k.append(k/100)
-    y_k.append(alpha_real*k/100 + beta_real)
-    #np.random.normal(loc=0,scale= 1, size=1)[0]
+    noise = 0
+    noise = np.random.normal(loc=0,scale= 1, size=1)[0]
+    y_k.append(alpha_real*k/100 + beta_real + noise)
+    y_k_real.append(alpha_real*k/100 + beta_real)
 
+random_scatter = pd.DataFrame()
+random_scatter["x_k"] = x_k
+random_scatter["y_k"] = y_k
+random_scatter["y_k_real"] = y_k_real
+#random_scatter.to_csv("data.csv")
+
+data = pd.read_csv("data.csv")
+
+x_k = data["x_k"]
+y_k = data['y_k']
+y_k_real = data['y_k_real']
+
+plt.plot(x_k,y_k_real)
+plt.scatter(x_k,y_k)
 
 
 #BRUTEFORCE
@@ -263,7 +281,7 @@ for k in range(0,101):
 
 
 
-def f12(y_k ,x_list ,var1,var2):
+def linear(y_k ,x_list ,var1,var2):
     #print(y_k)
     #print(x_list)
     #print(var1)
@@ -273,7 +291,7 @@ def f12(y_k ,x_list ,var1,var2):
     return sum(error)
 
 
-def f22(y_k ,x_list ,var1,var2):
+def rational(y_k ,x_list ,var1,var2):
     f_pred = [var1/(1+x*var2) for x in x_list]
     error =  [(var1 - var2)**2 for var1, var2 in zip(f_pred, y_k)]
     return sum(error)
@@ -286,10 +304,6 @@ def f22(y_k ,x_list ,var1,var2):
 
 
 
-
-
-plt.plot(y_k)
-
 eps = 0.001
 
 
@@ -300,20 +314,27 @@ def bruteforce_mult(fx,y_k,x_k,lb,ub,eps):
     b_min = lb
     f_calc = 0
     iter = 0
-    f_x_min = fx(y_k,x_k,lb,lb)
+    f_x_min = fx(y_k,x_k,lb,ub)
     for k in range(int(lb*100),(n+1)*100,100):
         k = k/100
-        iter += 1
+        
         #print(iter)
-        a_k = 0+k*(1-0)/n
+        a_k = lb+k*(ub-lb)/n
 
         for k2 in range(int(lb*100),(n+1)*100,100):
             k2 = k2/100
-            iter += 1
-            b_k = 0+k2*(1-0)/n
+            
+            b_k = lb+k2*(ub-lb)/n
+            b_k == -1
+            
             #print(str(a_k) + " - " + str(b_k))
-            kth_value =f12(y_k,x_k,a_k,b_k)
+            try:
+                kth_value =fx(y_k,x_k,a_k,b_k)
+            except ZeroDivisionError:
+                continue
+            #kth_value =fx(y_k,x_k,a_k,b_k)
             f_calc += 1
+            iter += 1
             if kth_value < f_x_min:
                 f_x_min = kth_value
                 a_min = a_k 
@@ -321,66 +342,8 @@ def bruteforce_mult(fx,y_k,x_k,lb,ub,eps):
     return a_min, b_min, f_x_min, iter, f_calc
 
 
-a_min, b_min, f_x_min, iter, f_calc =  bruteforce_mult(f12,y_k,x_k,0,1,eps)
-
-
-
-
-
-a_varianst = np.linspace(0,1,100)
-b_variants = np.linspace(0,1,100)
-[a_grid, b_grid] = np.meshgrid(a_varianst,b_variants)
-
-f_grid =  f12(y_k,x_k,a_grid,b_grid)
-
-
-
-fig = plt.figure(figsize= [12.8, 9.6])
-graph = fig.add_subplot(111, projection='3d')
-risunok = graph.plot_surface(a_grid,b_grid,f_grid,cmap=cm.coolwarm,alpha=0.7)
-graph.scatter(a_min, b_min, f_x_min, c='red',marker='o',s=50)
-graph.set_xlabel('a Label')
-graph.set_ylabel('b Label')
-graph.set_zlabel('Error Label')
-graph.view_init(30, 135)
-fig.colorbar(risunok, shrink=0.2, aspect=10)
-plt.title("Grid multi first")
-plt.show()
-
-
-#2)
-
-a_varianst_rational = np.linspace(0,1,100)
-b_variants_rational = np.linspace(0,1,100)
-[a_grid_rational, b_grid_rational] = np.meshgrid(a_varianst_rational,b_variants_rational)
-
-f_grid_rational =  f22(y_k,x_k,a_grid_rational,b_grid_rational)
-
-
-a_min2, b_min2, f_x_min2, iter2, f_calc2 =  bruteforce_mult(f22,y_k,x_k,0,1,eps)
-
-fig = plt.figure(figsize= [12.8, 9.6])
-graph = fig.add_subplot(111, projection='3d')
-risunok = graph.plot_surface(a_grid_rational,b_grid_rational,f_grid_rational,cmap=cm.coolwarm,alpha=0.7)
-graph.scatter(a_min2, b_min2, f_x_min2, c='red',marker='o',s=50)
-graph.set_xlabel('a Label')
-graph.set_ylabel('b Label')
-graph.set_zlabel('Error Label')
-graph.view_init(30, 135)
-fig.colorbar(risunok, shrink=0.2, aspect=10)
-plt.title("Grid multi first")
-plt.show()
-
 
 #Gauss
-
-
-
-
-
-
-
-
 
 
 
@@ -441,12 +404,9 @@ def dichotomy_new(fx,a,b,eps,opt_value,y_k ,x_list ,var1,var2):
 
         return x_min_dic1, f_x_min_dic1, iter_dic1, f_calc_dic1
 
-dichotomy_new(f12,0,1,0.001,'var1',y_k ,x_k ,0,0.9748271672150726)
 
 
-alpha_real,beta_real
-
-def gauss(y_k,x_k,fx,eps):
+def gauss(y_k,x_k,fx,lb,ub,eps):
     
     alph = random.uniform(0, 1)
     beta = random.uniform(0, 1)
@@ -461,60 +421,17 @@ def gauss(y_k,x_k,fx,eps):
 
         #print(str(alph) + ' - ' + str(beta))
 
-        alph1 = dichotomy_new(fx,0,1,0.000001,'var1',y_k ,x_k ,0,beta)[0]
-        beta1 = dichotomy_new(fx,0,1,0.000001,'var2',y_k ,x_k ,alph1,0)[0]
+        alph1 = dichotomy_new(fx,lb,ub,eps,'var1',y_k ,x_k ,0,beta)[0]
+        beta1 = dichotomy_new(fx,lb,ub,eps,'var2',y_k ,x_k ,alph1,0)[0]
         f_new = fx(y_k, x_k,alph1, beta1)
-        f_calc += 1 + dichotomy_new(fx,0,1,0.000001,'var2',y_k ,x_k ,alph1,0)[3] + dichotomy_new(fx,0,1,0.000001,'var1',y_k ,x_k ,0,beta)[3]
-        iter += 1 + dichotomy_new(fx,0,1,0.000001,'var2',y_k ,x_k ,alph1,0)[2] + dichotomy_new(fx,0,1,0.000001,'var1',y_k ,x_k ,0,beta)[2]
+        f_calc += 1 + dichotomy_new(fx,lb,ub,eps,'var2',y_k ,x_k ,alph1,0)[3] + dichotomy_new(fx,lb,ub,eps,'var1',y_k ,x_k ,0,beta)[3]
+        iter += 1 + dichotomy_new(fx,lb,ub,eps,'var2',y_k ,x_k ,alph1,0)[2] + dichotomy_new(fx,lb,ub,eps,'var1',y_k ,x_k ,0,beta)[2]
         alph = alph1
         beta = beta1
     return alph, beta, f_new,iter, f_calc
     
 
-a_min_gauss1, b_min_gauss1, f_x_min_gauss1, iter_gauss1, f_calc_gauss1 = gauss(y_k,x_k,f12,0.001)
-
-
-fig = plt.figure(figsize= [12.8, 9.6])
-graph = fig.add_subplot(111, projection='3d')
-risunok = graph.plot_surface(a_grid,b_grid,f_grid,cmap=cm.coolwarm,alpha=0.7)
-graph.scatter(a_min_gauss1, b_min_gauss1, f_x_min_gauss1, c='red',marker='o',s=50)
-graph.set_xlabel('a Label')
-graph.set_ylabel('b Label')
-graph.set_zlabel('Error Label')
-graph.view_init(30, 135)
-fig.colorbar(risunok, shrink=0.2, aspect=10)
-plt.title("Gauss second")
-plt.show()
-
-
-
-
-
-gauss(y_k,x_k,f22,0.001)
-
-
-
-a_min_gauss2, b_min_gauss2, f_x_min_gauss2, iter_gauss2, f_calc_gauss2 = gauss(y_k,x_k,f22,0.001)
-
-
-fig = plt.figure(figsize= [12.8, 9.6])
-graph = fig.add_subplot(111, projection='3d')
-risunok = graph.plot_surface(a_grid_rational,b_grid_rational,f_grid_rational,cmap=cm.coolwarm,alpha=0.7)
-graph.scatter(a_min_gauss2, b_min_gauss2, f_x_min_gauss2, c='red',marker='o',s=50)
-graph.set_xlabel('a Label')
-graph.set_ylabel('b Label')
-graph.set_zlabel('Error Label')
-graph.view_init(30, 135)
-fig.colorbar(risunok, shrink=0.2, aspect=10)
-plt.title("Gauss second")
-plt.show()
-
-
-
-
-
-
-def f12_nelder(params):
+def linear_nelder(params):
     var1,var2 = params[0], params[1]
     #print(y_k)
     #print(x_list)
@@ -525,16 +442,13 @@ def f12_nelder(params):
     return sum(error)
 
 
-def f22_nelder(params):
+def rational_nelder(params):
     var1,var2 = params[0], params[1]
     f_pred = [var1/(1+x*var2) for x in x_k]
     error =  [(var1 - var2)**2 for var1, var2 in zip(f_pred, y_k)]
     return sum(error)
 
 
-
-a = 0
-b = 100
 
 
 def nelder_mead(f, x_start,
@@ -558,7 +472,7 @@ def nelder_mead(f, x_start,
     #            x[i] = a
         return x
 
-    iter_count = 1
+    iter_count = 0
     f_calc = 0
     # init
     dim = len(x_start)
@@ -647,27 +561,151 @@ def nelder_mead(f, x_start,
 
 
 
+#Linear Results
 
-nelder_mead(f22_nelder, np.array([0.0, 0.0]))
+a_brut_lin, b_brut_lin, f_min_brut_lin, iter_brut_lin, f_calc_brut_lin =  bruteforce_mult(linear,y_k,x_k,0,1,eps)
+print("Bruteforce linear a and b are: ",a_brut_lin , b_brut_lin)
+print("Bruteforce linear f_min is -  ",f_min_brut_lin)
+print("Bruteforce linear iter and f_calc are:  ",iter_brut_lin,f_calc_brut_lin )
+brut_lin_line = [a_brut_lin*x+b_brut_lin for x in x_k]
 
 
 
+a_gauss_lin, b_gauss_lin, f_min_gauss_lin, iter_gauss_lin, f_calc_gauss_lin = gauss(y_k,x_k,linear,0,1,0.001)
+print("Gauss linear a and b are: ",a_gauss_lin , b_gauss_lin)
+print("Gauss linear f_min is -  ",f_min_gauss_lin)
+print("Gauss linear iter and f_calc are:  ",iter_gauss_lin,f_calc_gauss_lin )
+gauss_lin_line = [a_gauss_lin*x+b_gauss_lin for x in x_k]
 
 
 
+a_nelder_lin, b_nelder_lin, f_min_nelder_lin, iter_nelder_lin, f_calc_nelder_lin = nelder_mead(linear_nelder, np.array([0.0, 0.0]))
+print("Nelder linear a and b are: ",a_nelder_lin , b_nelder_lin)
+print("Nelder linear f_min is -  ",f_min_nelder_lin)
+print("Nelder linear iter and f_calc are:  ",iter_nelder_lin,f_calc_nelder_lin )
+nelder_lin_line = [a_nelder_lin*x+b_nelder_lin for x in x_k]
 
-#rational
 
-a_min2_nelder, b_min2_nelder, f_x_min2_nelder, iter2_nelder, f_calc2_nelder =  nelder_mead(f22_nelder, np.array([0.0, 0.0]))
+#3d graphs
+
+a_varianst = np.linspace(0,1,100)
+b_variants = np.linspace(0,1,100)
+[a_grid, b_grid] = np.meshgrid(a_varianst,b_variants)
+f_grid =  linear(y_k,x_k,a_grid,b_grid)
 
 fig = plt.figure(figsize= [12.8, 9.6])
 graph = fig.add_subplot(111, projection='3d')
-risunok = graph.plot_surface(a_grid_rational,b_grid_rational,f_grid_rational,cmap=cm.coolwarm,alpha=0.7)
-graph.scatter(a_min2_nelder, b_min2_nelder, f_x_min2_nelder, c='red',marker='o',s=50)
+risunok = graph.plot_surface( a_grid,b_grid,f_grid, cmap=cm.coolwarm,alpha=0.7)
+graph.scatter(a_brut_lin, b_brut_lin, f_min_brut_lin, c='red',marker='o',s=50, label = "Bruteforce",alpha=1)
+graph.scatter(a_gauss_lin, b_gauss_lin, f_min_gauss_lin, c='blue',marker='o',s=10, label = "Gauss")
+graph.scatter(a_nelder_lin, b_nelder_lin, f_min_nelder_lin, c='green',marker='o',s=10, label = "Nelder-Mead")
 graph.set_xlabel('a Label')
 graph.set_ylabel('b Label')
 graph.set_zlabel('Error Label')
-graph.view_init(30, 55)
+graph.view_init(30, 135)
+graph.legend()
 fig.colorbar(risunok, shrink=0.2, aspect=10)
-plt.title("Grid multi first")
+plt.title("Linear results comparison")
+plt.savefig('Plots/3d_linear_big.png')
 plt.show()
+
+
+
+
+a_varianst_scaled = np.linspace(0.6,0.63,100)
+b_variants_scaled = np.linspace(0.89,0.91,100)
+[a_grid_scaled, b_grid_scaled] = np.meshgrid(a_varianst_scaled,b_variants_scaled)
+f_grid_scaled =  linear(y_k,x_k,a_grid_scaled,b_grid_scaled)
+
+fig = plt.figure(figsize= [12.8, 9.6])
+graph = fig.add_subplot(111, projection='3d')
+risunok = graph.plot_surface( a_grid_scaled,b_grid_scaled,f_grid_scaled, cmap=cm.coolwarm,alpha=0.7)
+graph.scatter(a_brut_lin, b_brut_lin, f_min_brut_lin, c='red',marker='o',s=50, label = "Bruteforce",alpha=1)
+graph.scatter(a_gauss_lin, b_gauss_lin, f_min_gauss_lin, c='blue',marker='o',s=50, label = "Gauss")
+graph.scatter(a_nelder_lin, b_nelder_lin, f_min_nelder_lin, c='green',marker='o',s=10, label = "Nelder-Mead")
+graph.set_xlabel('a Label')
+graph.set_ylabel('b Label')
+graph.set_zlabel('Error Label')
+graph.view_init(30, 135)
+graph.legend()
+fig.colorbar(risunok, shrink=0.2, aspect=10)
+plt.title("Linear results comparison scaled")
+plt.savefig('Plots/3d_linear_small.png')
+plt.show()
+
+
+#scatter graphs
+
+
+plt.plot(x_k, y_k_real, label = "no noise data", linewidth=7.0, alpha = 0.7)
+plt.scatter(x_k,y_k,label = 'noisy data')
+plt.plot(x_k, brut_lin_line, label = 'Brut-force line'   ,linewidth=4.0)
+plt.plot(x_k, gauss_lin_line, label = 'Gauss line',linewidth=3.0)
+plt.plot(x_k, nelder_lin_line, label = 'Nelder-Mead line',linewidth=1.0)
+plt.legend()
+plt.title("Linear approximations")
+plt.savefig('Plots/scat_linear.png')
+plt.show()
+
+#Rational results
+
+
+a_brut_rat, b_brut_rat, f_min_brut_rat, iter_brut_rat, f_calc_brut_rat =  bruteforce_mult(rational,y_k,x_k,-0.4,1,eps)
+print("Bruteforce rational a and b are: ",a_brut_rat , b_brut_rat)
+print("Bruteforce rational f_min is -  ",f_min_brut_rat)
+print("Bruteforce rational iter and f_calc are:  ",iter_brut_rat,f_calc_brut_rat )
+brut_rat_line = [a_brut_rat/(1+x*b_brut_rat) for x in x_k]
+
+
+a_gauss_rat, b_gauss_rat, f_min_gauss_rat, iter_gauss_rat, f_calc_gauss_rat = gauss(y_k,x_k,rational,-2,2,0.001)
+print("Gauss rational a and b are: ",a_gauss_rat , b_gauss_rat)
+print("Gauss rational f_min is -  ",f_min_gauss_rat)
+print("Gauss rational iter and f_calc are:  ",iter_gauss_rat,f_calc_gauss_rat)
+gauss_rat_line = [a_gauss_rat/(1+x*b_gauss_rat) for x in x_k]
+
+
+a_nelder_rat, b_nelder_rat, f_min_nelder_rat, iter_nelder_rat, f_calc_nelder_rat = nelder_mead(rational_nelder, np.array([0.0, 0.0]))
+print("Nelder rational a and b are: ",a_nelder_rat , b_nelder_rat)
+print("Nelder rational f_min is -  ",f_min_nelder_rat)
+print("Nelder rational iter and f_calc are:  ",iter_nelder_rat,f_calc_nelder_rat)
+nelder_rat_line = [a_nelder_rat/(1+x*b_nelder_rat) for x in x_k]
+
+
+
+
+#3d graph
+a_varianst = np.linspace(0.9,1.1,100)
+b_variants = np.linspace(-0.35,-0.25,100)
+[a_grid, b_grid] = np.meshgrid(a_varianst,b_variants)
+f_grid =  rational(y_k,x_k,a_grid,b_grid)
+
+fig = plt.figure(figsize= [12.8, 9.6])
+graph = fig.add_subplot(111, projection='3d')
+risunok = graph.plot_surface( a_grid,b_grid,f_grid, cmap=cm.coolwarm,alpha=0.7)
+graph.scatter(a_brut_rat, b_brut_rat, f_min_brut_rat, c='red',marker='o',s=50, label = "Bruteforce",alpha=1)
+graph.scatter(a_gauss_rat, b_gauss_rat, f_min_gauss_rat, c='blue',marker='o',s=10, label = "Gauss")
+graph.scatter(a_nelder_rat, b_nelder_rat, f_min_nelder_rat, c='green',marker='o',s=10, label = "Nelder-Mead")
+graph.set_xlabel('a Label')
+graph.set_ylabel('b Label')
+graph.set_zlabel('Error Label')
+graph.view_init(30, 65)
+graph.legend()
+fig.colorbar(risunok, shrink=0.3, aspect=10)
+plt.title("Rational results comparison")
+plt.savefig('Plots/3d_rat.png')
+plt.show()
+
+
+# scatter graphs
+
+plt.plot(x_k, y_k_real, label = "no noise data", linewidth=7.0, alpha = 0.7)
+plt.scatter(x_k,y_k,label = 'noisy data')
+plt.plot(x_k, brut_rat_line, label = 'Brut-force line'   ,linewidth=4.0)
+plt.plot(x_k, gauss_rat_line, label = 'Gauss line'       ,linewidth=3.0)
+plt.plot(x_k, nelder_rat_line, label = 'Nelder-Mead line',linewidth=1.0)
+plt.legend()
+plt.title("Rational approximations")
+plt.savefig('Plots/scat_rat.png')
+plt.show()
+
+
