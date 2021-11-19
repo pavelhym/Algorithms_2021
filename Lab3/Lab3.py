@@ -320,8 +320,9 @@ def rational_LMA(params):
 
 #GRADIENT DESCENT
 
+eps = 0.0000001
 
-a_grad_lin, b_grad_lin, iter_grad_lin, f_calc_grad_lin  = gradient_descent(linear_grad,eta=0.001, num_iterations=300,eps = 0.000001)
+a_grad_lin, b_grad_lin, iter_grad_lin, f_calc_grad_lin  = gradient_descent(linear_grad,eta=0.001, num_iterations=300,eps = eps)
 f_min_grad_lin = linear([a_grad_lin, b_grad_lin])
 
 print("Gradient descent linear a and b are: ",a_grad_lin , b_grad_lin)
@@ -331,7 +332,7 @@ grad_lin_line = [a_grad_lin*x+b_grad_lin for x in x_k]
 
 
 #conj_grad
-conj_grad_results_lin = scipy.optimize.minimize(linear, [0,0], method = 'CG',    options={'maxiter': 1000})
+conj_grad_results_lin = scipy.optimize.minimize(linear, [0,0], method = 'CG', tol = eps  ,  options={'maxiter': 1000})
 a_cgrad_lin, b_cgrad_lin = conj_grad_results_lin.x
 iter_cgrad_lin, f_calc_cgrad_lin = conj_grad_results_lin.nit, conj_grad_results_lin.nfev
 f_min_cgrad_lin = linear([a_cgrad_lin, b_cgrad_lin])
@@ -343,7 +344,7 @@ cgrad_lin_line = [a_cgrad_lin*x+b_cgrad_lin for x in x_k]
 
 #Newton
 
-newton_results_lin =  scipy.optimize.minimize(linear, [0,0],jac =linear_grad, hess = Hessian_linear , method = 'Newton-CG',          options={'maxiter': 1000})
+newton_results_lin =  scipy.optimize.minimize(linear, [0,0],jac =linear_grad, hess = Hessian_linear , method = 'Newton-CG', tol = eps,   options={'maxiter': 1000})
 a_newt_lin, b_newt_lin = newton_results_lin.x
 iter_newt_lin, f_calc_newt_lin = newton_results_lin.nit, newton_results_lin.nfev
 f_min_newt_lin = linear([a_newt_lin, b_newt_lin])
@@ -356,9 +357,9 @@ newt_lin_line = [a_newt_lin*x+b_newt_lin for x in x_k]
 
 
 #LMA
-LMA_results_lin = scipy.optimize.least_squares(linear_LMA, [1,-0.3],loss='linear',method='lm')
+LMA_results_lin = scipy.optimize.least_squares(linear_LMA, [0,0],ftol=eps, xtol=eps, gtol=eps,loss='linear',method='lm')
 a_LMA_lin, b_LMA_lin = LMA_results_lin.x
-iter_LMA_lin, f_calc_LMA_lin = 0, LMA_results_lin.nfev
+iter_LMA_lin, f_calc_LMA_lin = LMA_results_lin.njev, LMA_results_lin.nfev
 f_min_LMA_lin = linear([a_LMA_lin, b_LMA_lin])
 
 print("LMA linear a and b are: ",a_LMA_lin , b_LMA_lin)
@@ -394,7 +395,7 @@ graph.view_init(30, 135)
 graph.legend()
 fig.colorbar(risunok, shrink=0.2, aspect=10)
 plt.title("Linear results comparison scaled")
-#plt.savefig('Plots/3d_linear_small.png')
+plt.savefig('Plots/3d_linear.png')
 plt.show()
 
 
@@ -408,14 +409,14 @@ plt.plot(x_k, LMA_lin_line, label = 'LMA',linewidth=1.0)
 
 plt.legend()
 plt.title("Linear approximations")
-#plt.savefig('Plots/scat_linear.png')
+plt.savefig('Plots/scat_linear.png')
 plt.show()
 
 
 
 #rational
 
-a_grad_rat, b_grad_rat, iter_grad_rat, f_calc_grad_rat  = gradient_descent(rational_grad,eta=0.001, num_iterations=300)
+a_grad_rat, b_grad_rat, iter_grad_rat, f_calc_grad_rat  = gradient_descent(rational_grad,eta=0.001, num_iterations=300, eps = eps)
 f_min_grad_rat = rational([a_grad_rat, b_grad_rat])
 
 print("Gradient descent rational a and b are: ",a_grad_rat , b_grad_rat)
@@ -425,7 +426,7 @@ grad_rat_line = [a_grad_rat/(1+x*b_grad_rat) for x in x_k]
 
 
 
-conj_grad_results_rat = scipy.optimize.minimize(rational , [0,0], method = 'CG', options={'maxiter': 1000})
+conj_grad_results_rat = scipy.optimize.minimize(rational , [0,0], method = 'CG',tol = eps , options={'maxiter': 1000})
 a_cgrad_rat, b_cgrad_rat = conj_grad_results_rat.x
 iter_cgrad_rat, f_calc_cgrad_rat = conj_grad_results_rat.nit, conj_grad_results_rat.nfev
 f_min_cgrad_rat = rational([a_cgrad_rat, b_cgrad_rat])
@@ -438,7 +439,7 @@ cgrad_rat_line = [a_cgrad_rat/(1+x*b_cgrad_rat) for x in x_k]
 
 
 
-newton_results_rat = scipy.optimize.minimize(rational , [0,0],jac = rational_grad, hess =Hessian_rational , method = 'Newton-CG', options={'maxiter': 1000})
+newton_results_rat = scipy.optimize.minimize(rational , [0,0],jac = rational_grad, hess =Hessian_rational , method = 'Newton-CG',  tol = eps ,options={'maxiter': 1000})
 a_newt_rat, b_newt_rat = newton_results_rat.x
 iter_newt_rat, f_calc_newt_rat = newton_results_rat.nit, newton_results_rat.nfev
 f_min_newt_rat = rational([a_newt_rat, b_newt_rat])
@@ -450,7 +451,7 @@ newt_rat_line = [a_newt_rat/(1+x*b_newt_rat) for x in x_k]
 
 
 
-LMA_results_rat =  scipy.optimize.least_squares(rational_LMA, [0,0],loss='linear',method='lm', ftol=1e-10, xtol=1e-10, gtol=1e-10)
+LMA_results_rat =  scipy.optimize.least_squares(rational_LMA, [0,0],loss='linear',method='lm' ,ftol=eps, xtol=eps, gtol=eps)
 a_LMA_rat, b_LMA_rat = LMA_results_rat.x
 iter_LMA_rat, f_calc_LMA_rat = 0, LMA_results_rat.nfev
 f_min_LMA_rat = rational([a_LMA_rat, b_LMA_rat])
@@ -481,7 +482,7 @@ graph.view_init(30, 65)
 graph.legend()
 fig.colorbar(risunok, shrink=0.3, aspect=10)
 plt.title("Rational results comparison")
-#plt.savefig('Plots/3d_rat.png')
+plt.savefig('Plots/3d_rat.png')
 plt.show()
 
 
@@ -495,5 +496,5 @@ plt.plot(x_k, LMA_rat_line, label = 'LMA',linewidth=1.0)
 
 plt.legend()
 plt.title("Rational approximations")
-#plt.savefig('Plots/scat_rat.png')
+plt.savefig('Plots/scat_rat.png')
 plt.show()
