@@ -20,17 +20,42 @@ def f(x):
 
 y_k = []
 x_k = []
-
+y_k_real = []
 for k in range(0,1001):
     x = 3*k/1000
     x_k.append(x)
-    beta = 0
+    beta = np.random.normal(loc=0,scale= 1, size=1)[0]
     if f(x) < -100:
         y_k.append(-100 + beta)
+        y_k_real.append(-100)
     elif (f(x) <= 100) and (f(x) >= -100):
         y_k.append(f(x) + beta)
+        y_k_real.append(f(x))
     elif f(x) > 100:
         y_k.append(100 + beta)
+        y_k_real.append(100)
+
+
+def fitted_line(params):
+    fitted = []
+    a , b , c , d = params
+    def f_par(x):
+        return (a*x+b)/(x**2 + c*x + d)
+    
+    for k in range(0,1001):
+        x = 3*k/1000
+        
+        if f_par(x) < -100:
+            
+            fitted.append(-100)
+        elif (f_par(x) <= 100) and (f_par(x) >= -100):
+            
+            fitted.append(f_par(x))
+        elif f_par(x) > 100:
+            
+            fitted.append(100)
+    return fitted
+
 
 
 plt.plot(y_k)
@@ -48,7 +73,7 @@ def D_SE(params):
     aim = [0]*len(error)
     return error
 
-D_SE([1,1,1,1],x_k,y_k)[1]
+D_SE([1,1,1,1])
 
 def nelder_mead(f, x_start,
                 step=0.1, no_improve_thr=0.001,
@@ -161,7 +186,7 @@ def nelder_mead(f, x_start,
 nelder_mead(D, np.array([0.0,1.0,-3.0,2.0]),no_improve_thr=0.001,step=0.5)
 
 
-neld_mead = scipy.optimize.minimize(D, [0,1,-3,2], method = 'Nelder-Mead', options={'xatol': 0.001})
+neld_mead = scipy.optimize.minimize(D, [0,1,-3,2], method = 'Nelder-Mead', options={'xatol': 0.001 , "maxiter" : 1000})
 
 neld_mead.x
 neld_mead.fun
@@ -169,12 +194,12 @@ neld_mead.nfev
 neld_mead.nit
 
 
-
+eps = 0.001
 #LMA
 #lin_lm = scipy.optimize.root(D_SE, [0,1,-3,2], method='lm',  options={'ftol': 0.001})
 
-scipy.optimize.least_squares(D_SE, [1,1,-3,2], method='lm')
-
+result_LMA =  scipy.optimize.least_squares(D_SE, [0,1,-3,2], method='lm', ftol=eps, xtol=eps, gtol=eps)
+result_LMA.x
 
 
 #Annealing
@@ -185,70 +210,67 @@ import random
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-#------------------------------------------------------------------------------
-# Customization section:
-initial_temperature = 100
-cooling = 0.8  # cooling coefficient
-number_variables = 4
-upper_bounds = [10, 10, 10, 10]   
-lower_bounds = [-10, -10, -10, -10]  
-computing_time = 10 # second(s)
-  
 
-#------------------------------------------------------------------------------
 # Simulated Annealing Algorithm:
-initial_solution=np.zeros((number_variables))
-for v in range(number_variables):
-    initial_solution[v] = random.uniform(lower_bounds[v],upper_bounds[v])
-      
-current_solution = initial_solution
-best_solution = initial_solution
-n = 1  # no of solutions accepted
-best_fitness = D(best_solution)
-current_temperature = initial_temperature # current temperature
-start = time.time()
-no_attempts = 100 # number of attempts in each level of temperature
-record_best_fitness =[]
 
 
 
-for i in range(9999999):
-    for j in range(no_attempts):
-  
-        for k in range(number_variables):
-            current_solution[k] = best_solution[k] + 0.1*(random.uniform(lower_bounds[k],upper_bounds[k]))
-            current_solution[k] = max((min((current_solution[k], upper_bounds[k])), lower_bounds[k]))
+def annealing(fx, maxiter , initial_temperature = 100, cooling = 0.8, upper_bounds = [4, 4, 4, 4] ,lower_bounds = [-4, -4, -4, -4]     ):
+    number_variables = len(upper_bounds)
+    initial_solution=np.zeros((number_variables))
+    for v in range(number_variables):
+        initial_solution[v] = random.uniform(lower_bounds[v],upper_bounds[v])
 
-        current_fitness = D(current_solution)
-        E = abs(current_fitness - best_fitness)
-        if i == 0 and j == 0:
-            EA = E
+    current_solution = initial_solution
+    best_solution = initial_solution
+    n = 1  # no of solutions accepted
+    best_fitness = fx(best_solution)
+    current_temperature = initial_temperature # current temperature
+    no_attempts = 100 # number of attempts in each level of temperature
+    record_best_fitness =[]
+
+    f_calc = 1
+
+    for i in range(maxiter):
+        for j in range(no_attempts):
         
-        if current_fitness < best_fitness:
-            p = math.exp(-E/(EA * current_temperature))
+            for k in range(number_variables):
+                current_solution[k] = best_solution[k] + 0.1*(random.uniform(lower_bounds[k],upper_bounds[k]))
+                current_solution[k] = max((min((current_solution[k], upper_bounds[k])), lower_bounds[k]))
 
-            if random.random() < p:
-                accept = True
+            current_fitness = fx(current_solution)
+            f_calc += 1
+            E = abs(current_fitness - best_fitness)
+            if i == 0 and j == 0:
+                EA = E
+
+            if current_fitness < best_fitness:
+                p = math.exp(-E/(EA * current_temperature))
+
+                if random.random() < p:
+                    accept = True
+                else:
+                    accept = False
             else:
-                accept = False
-        else:
-            accept = True
+                accept = True
 
-        if accept == True:
-            best_solution = current_solution
-            best_fitness = D(best_solution)
-            n = n + 1 
-            EA = (EA *(n-1) + E)/n
-    
-    print('interation: {}, best_solution: {}, best_fitness: {}'.format(i, best_solution, best_fitness))
-    record_best_fitness.append(best_fitness)
+            if accept == True:
+                best_solution = current_solution
+                best_fitness = fx(best_solution)
+                f_calc += 1
+                n = n + 1 
+                EA = (EA *(n-1) + E)/n
 
-    current_temperature = current_temperature*cooling
-    end = time.time()
-    if end - start >= computing_time:
-        break
+        #print('interation: {}, best_solution: {}, best_fitness: {}'.format(i, best_solution, best_fitness))
+        record_best_fitness.append(best_fitness)
+
+        current_temperature = current_temperature*cooling
+        
+
+    return best_solution, best_fitness,f_calc, i
 
 
+annealing(D,1000)
 
 anneal = scipy.optimize.dual_annealing(D, [(-10,10),(-10,10),(-10,10),(-10,10)])
 
@@ -292,19 +314,10 @@ def crossover(mutated, target, dims, cr):
     return trial
 
 
+obj = D
 
+def differential_evolution(obj, bounds,pop_size = 100, iter = 1000, w = 0.5, p = 0.7):
 
-def differential_evolution(obj, bounds,pop_size = 100, iter = 100, w = 0.5, p = 0.7):
-
-
-
-
-
-
-
-    # initialise population of candidate solutions randomly within the specified bounds
-
-    
     pop = bounds[:, 0] + (rand(pop_size, len(bounds)) * (bounds[:, 1] - bounds[:, 0]))
     # evaluate initial population of candidate solutions
 
@@ -316,6 +329,8 @@ def differential_evolution(obj, bounds,pop_size = 100, iter = 100, w = 0.5, p = 
 
     f_calc = len(pop)
 
+    i = 1
+    j = 1
     # run iterations of the algorithm
     for i in range(iter):
         # iterate over all candidate solutions
@@ -362,16 +377,91 @@ dif_evol_result = scipy.optimize.differential_evolution(D, bounds, strategy='bes
 D(result[0])
 
 
+#Results
+
+#Nealder_mead
+
+neld_mead = scipy.optimize.minimize(D, [-3,1,1,-3], method = 'Nelder-Mead', options={'xatol': 0.001 , "maxiter" : 1000})
+neld_params, f_min_neld, iter_neld, f_calc_neld  = neld_mead.x, neld_mead.fun, neld_mead.nit, neld_mead.nfev
+line_neld = fitted_line(neld_params)
+
+print("Nelder-Mead parameters: ",neld_params)
+print("Nelder-Mead f_min is -  ",f_min_neld)
+print("Nelder-Mead iter and f_calc are:  ",iter_neld,f_calc_neld )
+
+
+neld_mead_man =  nelder_mead(D, np.array([0,1,-3,2]),no_improve_thr=0.0001,step=0.5)
+neld_man_params, iter_neld_man, f_calc_neld_man  = neld_mead_man[0][0], neld_mead_man[1], neld_mead_man[2]
+f_min_meld_man = D(neld_man_params)
+line_neld_man = fitted_line(neld_mead_man[0][0])
+
+
+#LMA
+
+LMA =  scipy.optimize.least_squares(D_SE, [-3,1,1,-3], method='lm', ftol=eps, xtol=eps, gtol=eps)
+LMA_params, iter_LMA, f_calc_LMA  = LMA.x, LMA.nfev, LMA.nfev
+f_min_LMA = D(LMA_params)
+line_LMA = fitted_line(LMA_params)
+
+print("LMA parameters: ",LMA_params)
+print("LMA f_min is -  ",f_min_LMA)
+print("LMA iter and f_calc are:  ",iter_LMA,f_calc_LMA )
+
+
+
+#Annealing 
+
+anneal = scipy.optimize.dual_annealing(D, [(-5,5),(-5,5),(-5,5),(-5,5)], maxiter=1000)
+anneal_params, f_min_anneal, iter_anneal, f_calc_anneal  = anneal.x, anneal.fun, anneal.nit, anneal.nfev
+line_anneal = fitted_line(anneal_params)
+
+print("Annealing parameters: ",anneal_params)
+print("Annealing f_min is -  ",f_min_anneal)
+print("Annealing iter and f_calc are:  ",iter_anneal,f_calc_anneal )
+
+
+
+anneal_man = annealing(D,1000)
+anneal_params_man,f_calc_anneal, iter_anneal,   = anneal_man[0], anneal_man[1], anneal_man[2]+1
+f_min_anneal_man = D (anneal_params_man)
+
+#differential_evolution
+
+
+dif_evol_result = scipy.optimize.differential_evolution(D, [(-5,5),(-5,5),(-5,5),(-5,5)], strategy='best1bin', maxiter=1000, tol=eps)
+dif_evol_params, f_min_dif_evol, iter_dif_evol, f_calc_dif_evol  = dif_evol_result.x, dif_evol_result.fun, dif_evol_result.nit, dif_evol_result.nfev
+line_dif_evol = fitted_line(dif_evol_params)
+
+print("Differential Evolution parameters: ",dif_evol_params)
+print("Differential Evolution f_min is -  ",f_min_dif_evol)
+print("Differential Evolution iter and f_calc are:  ",iter_dif_evol,f_calc_dif_evol )
+
+
+
+
+#plt.plot(x_k, y_k_real, label = "no noise data", linewidth=7.0, alpha = 0.7)
+plt.scatter(x_k,y_k,label = 'noisy data', s=4)
+plt.plot(x_k, line_neld, label = 'Nelder-Mead', color = "red"   )
+plt.plot(x_k, line_LMA, label = 'LMA'   ,color = "green"    ,linewidth=2.0)
+plt.plot(x_k, line_anneal, label = 'Annealing', color = "orange" ,linewidth=2.0)
+plt.plot(x_k, line_dif_evol, label = 'Diff evol', color = "black" ,linewidth=1.0)
+plt.legend()
+plt.title("Rational approximations")
+plt.savefig('Plots/scat_rat_bad.png')
+plt.show()
+
+
 
 #2
 
 
 
-""" Traveling salesman problem solved using Simulated Annealing.
-"""
 from scipy import *
 from pylab import *
+from numpy import *
 
+import plotly.express as px
+import pandas as pd
 
 
 def Distance(R1, R2):
@@ -380,7 +470,7 @@ def Distance(R1, R2):
 
 from math import sin, cos, sqrt, atan2, radians
 
-
+#def distance betwwen points in coordinates
 def Distance(R1, R2):
     # approximate radius of earth in km
     R = 6373.0
@@ -411,9 +501,9 @@ def reverse(city, n):
     nn = (1+ ((n[1]-n[0]) % nct))/2 # half the lenght of the segment to be reversed
     # the segment is reversed in the following way n[0]<->n[1], n[0]+1<->n[1]-1, n[0]+2<->n[1]-2,...
     # Start at the ends of the segment and swap pairs of cities, moving towards the center.
-    print(nn)
+    #print(nn)
     for j in range(0,int(nn)):
-        print(j)
+        #print(j)
         k = (n[0]+j) % nct
         l = (n[1]-j) % nct
         (city[k],city[l]) = (city[l],city[k])  # swap
@@ -454,7 +544,7 @@ def Plot(city, R, dist):
     fig.update_layout(mapbox_style="stamen-terrain", mapbox_zoom=2.5, mapbox_center_lat = 39,mapbox_center_lon = -97,
         margin={"r":0,"t":0,"l":0,"b":0})
     fig.show()
-
+    
     print('Total distance='+str(dist))
 
 
@@ -491,9 +581,9 @@ def TSP(data):
         T = Tstart # temperature
 
         Plot(city, R, dist)
-
+        steps = 0
         for t in range(maxTsteps):  # Over temperature
-
+            steps += 1
             accepted = 0
             for i in range(maxSteps): # At each temperature, many Monte Carlo steps
 
@@ -546,44 +636,27 @@ def TSP(data):
 
 
         Plot(city, R, dist)
-    return(city, R, dist)
+    return(city, R, dist, steps)
 
 
 
 
-
-
-
-
-
-res =  TSP(top_20)
-
-R = res[1]
-city = res[0]
-
-import plotly.express as px
-import pandas as pd
-
-
-
-
-
-import pandas as pd
 
 us_cities = pd.read_csv("https://raw.githubusercontent.com/plotly/datasets/master/us-cities-top-1k.csv")
 us_cities = us_cities.sort_values(by=['Population'],ascending=False).groupby("State").first().sort_values(by=['Population'],ascending=False).head(30)
 
-top_20 = us_cities.reset_index()[['lat','lon']]
-
-import plotly.express as px
-
-import plotly.express as px
+top_30 = us_cities.reset_index()[['lat','lon']]
 
 
-plot(Pt[:,0], Pt[:,1], '-o')
 
-fig = px.line_mapbox( lat=Pt[:,0], lon=Pt[:,1], zoom=10, height=300)
 
-fig.update_layout(mapbox_style="stamen-terrain", mapbox_zoom=2.5, mapbox_center_lat = 39,mapbox_center_lon = -97,
-    margin={"r":0,"t":0,"l":0,"b":0})
-fig.show()
+res =  TSP(top_30)
+
+R = res[1]
+city = res[0]
+
+
+
+
+
+
