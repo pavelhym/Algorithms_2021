@@ -7,7 +7,7 @@ import pandas as pd
 
 
 
-
+#Create random adj matrix
 def random_adjacency_matrix(V,E):
 
     matrix = np.zeros((V,V))
@@ -26,7 +26,7 @@ adj_matrix =  random_adjacency_matrix(100,200)
 
 
 
-
+#Matrix to list
 def convert_to_adjacency(matrix):
     start = 0
     res = []
@@ -82,16 +82,7 @@ print(adj_matrix[:2])
 print(adj_list[:2])
 
 
-
-
 #2
-
-
-
-
-
-
-visited = []
 
 
 
@@ -121,16 +112,11 @@ def find_components(adj_list):
     components.pop(0)
     return grop_n, components
 
-result = find_components(adj_list)
 
 
 
 
 #BFS
-
-start = 1
-goal = 1
-graph = adj_list
 
 
 def BFS_SP(graph, start, goal):
@@ -178,6 +164,14 @@ def BFS_SP(graph, start, goal):
     return
 
 
+
+
+
+#DFS usage
+result = find_components(adj_list)
+print("Number of groups = ",result[0])
+
+#BFS usage
 BFS_SP(adj_list,21,0)
 
 
