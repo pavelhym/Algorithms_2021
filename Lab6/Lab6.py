@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import decimal
 import pandas as pd
 from collections import defaultdict
-
+import copy
 
 
 
@@ -43,10 +43,46 @@ def convert_to_adjacency_weighted(adj_matrix):
 
 
 
+
+
 adj_list = convert_to_adjacency_weighted(adj_matrix)
 
+adj_matrix_unweighted =  copy.deepcopy(adj_matrix)
+adj_matrix_unweighted[adj_matrix_unweighted>0] = 1
 
-import sys
+#Graph
+
+import networkx as nx
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy as sp
+import pandas as pd
+
+adj_sparse = sp.sparse.coo_matrix(adj_matrix_unweighted, dtype=np.int8)
+labels = range(0,100)
+DF_adj = pd.DataFrame(adj_sparse.toarray(),index=labels,columns=labels)
+print(DF_adj)
+
+
+
+#Network graph
+G = nx.Graph()
+G.add_nodes_from(labels)
+
+#Connect nodes
+for i in range(DF_adj.shape[0]):
+    col_label = DF_adj.columns[i]
+    for j in range(DF_adj.shape[1]):
+        row_label = DF_adj.index[j]
+        node = DF_adj.iloc[i,j]
+        if node == 1:
+            G.add_edge(col_label,row_label)
+
+
+#Draw graph
+nx.draw(G,with_labels = True)
+
+
  
 class Graph(object):
     def __init__(self, nodes, graph):
@@ -55,63 +91,57 @@ class Graph(object):
 
     
     def get_nodes(self):
-        "Returns the nodes of the graph."
         return self.nodes
     
-    def get_outgoing_edges(self, node):
-        "Returns the neighbors of a node."
+    def neighbors(self, node):
         connections = []
         for out_node in self.nodes:
             if self.graph[node].get(out_node, False) != False:
                 connections.append(out_node)
         return connections
     
-    def value(self, node1, node2):
-        "Returns the value of an edge between two nodes."
+    def dist(self, node1, node2):
         return self.graph[node1][node2]
 
-
-
- 
 
 
 def dijkstra_algorithm(graph, start_node):
     unvisited_nodes = list(graph.get_nodes())
  
-    # We'll use this dict to save the cost of visiting each node and update it as we move along the graph   
+       
     distance = {}
  
-    # We'll use this dict to save the shortest known path to a node found so far
     previous_nodes = {}
  
-    # We'll use max_value to initialize the "infinity" value of the unvisited nodes   
-    max_value = sys.maxsize
+    # Init dist 
+    max_value = 1000000000000
     for node in unvisited_nodes:
         distance[node] = max_value
-    # However, we initialize the starting node's value with 0   
+     
     distance[start_node] = 0
     
-    # The algorithm executes until we visit all nodes
-    while unvisited_nodes:
-        # The code block below finds the node with the lowest score
-        current_min_node = None
-        for node in unvisited_nodes: # Iterate over the nodes
-            if current_min_node == None:
-                current_min_node = node
-            elif distance[node] < distance[current_min_node]:
-                current_min_node = node
+   
+    while len(unvisited_nodes) > 0:
+        # node with the lowest score
+        current_node = None
+        for node in unvisited_nodes: 
+            if current_node == None:
+                current_node = node
+            elif distance[node] < distance[current_node]:
+                current_node = node
                 
-        # The code block below retrieves the current node's neighbors and updates their distances
-        neighbors = graph.get_outgoing_edges(current_min_node)
+        # Neighbors
+        neighbors = graph.neighbors(current_node)
+        
         for neighbor in neighbors:
-            tentative_value = distance[current_min_node] + graph.value(current_min_node, neighbor)
+            tentative_value = distance[current_node] + graph.dist(current_node, neighbor)
             if tentative_value < distance[neighbor]:
                 distance[neighbor] = tentative_value
-                # We also update the best path to the current node
-                previous_nodes[neighbor] = current_min_node
+                
+                previous_nodes[neighbor] = current_node
  
-        # After visiting its neighbors, we mark the node as "visited"
-        unvisited_nodes.remove(current_min_node)
+        
+        unvisited_nodes.remove(current_node)
     
     return previous_nodes, distance
 
@@ -129,21 +159,19 @@ previous_nodes, shortest_path = dijkstra_algorithm(graph=graph_dijkstra, start_n
 
 
 def bellman_ford(graph, start_node):
-    # Step 1: Prepare the distance and previous_nodes for each node
+   
     distance, previous_nodes = dict(), dict()
     for node in graph:
         distance[node], previous_nodes[node] = float('inf'), None
     distance[start_node] = 0
 
-    # Step 2: Relax the edges
-    for _ in range(len(graph) - 1):
+    for i in range(len(graph) - 1):
         for node in graph:
             for neighbour in graph[node]:
-                # If the distance between the node and the neighbour is lower than the current, store it
+                
                 if distance[neighbour] > distance[node] + graph[node][neighbour]:
                     distance[neighbour], previous_nodes[neighbour] = distance[node] + graph[node][neighbour], node
 
-    # Step 3: Check for negative weight cycles
     for node in graph:
         for neighbour in graph[node]:
             assert distance[neighbour] <= distance[node] + graph[node][neighbour], "Negative weight cycle."
@@ -164,7 +192,7 @@ import functools
 
 
 
-
+iteration = list(range(0,10))
 dijkstra = []
 ford = []
 for _ in range(10):
@@ -179,16 +207,19 @@ for _ in range(10):
     ford.append(time_eval)
 
 
+
+plt.plot(iteration, dijkstra, label = "dijkstra")
+plt.plot(iteration, ford, label = 'bellman-ford')
+plt.legend()
+plt.title("Algorithms comparison")
+plt.savefig('Plots/comparison.png')
+plt.show()
+
 print('AVG time for Dijkstra - ', np.mean(dijkstra))
 print('AVG time for Bellman Ford - ', np.mean(ford))
 
 
-
-
-
-
 #3
-
 
 
 #to store info on each node
@@ -206,36 +237,36 @@ class Node():
         return self.position == other.position
 
 
-def A_star(graph, start, end):
+def A_star(graph, start, end, distance = "Euc" ,strict = False):
 
-    # Create start and end node
+    
     start_node = Node(None, start)
     start_node.g = start_node.h = start_node.f = 0
     end_node = Node(None, end)
     end_node.g = end_node.h = end_node.f = 0
 
     # Lists to store nodes to visit and visited nodes
-    open_list = []
-    closed_list = []
+    tovisit = []
+    visited = []
 
     # Add the start node
-    open_list.append(start_node)
+    tovisit.append(start_node)
 
-    # Come till the end
-    while len(open_list) > 0:
+    # iterate over all fields
+    while len(tovisit) > 0:
 
-        # Take first node from open list (then it will be the first child)
-        current_node = open_list[0]
+        
+        current_node = tovisit[0]
         current_index = 0
-        for index, item in enumerate(open_list):
+        for index, item in enumerate(tovisit):
             if item.f < current_node.f:
                 current_node = item
                 current_index = index
 
-        # Remove from open list to closed 
+        # Visited
         
-        open_list.pop(current_index)
-        closed_list.append(current_node)
+        tovisit.pop(current_index)
+        visited.append(current_node)
 
         # Found the goal
         if current_node == end_node:
@@ -247,33 +278,38 @@ def A_star(graph, start, end):
                 current = current.parent
             return path[::-1] # Return reversed path
 
-        # Generate children
+        # Possible new steps
         children = []
-        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]: # Adjacent squares
+        if strict == True:
+            reloc =  [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        else:
+            reloc = [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+        
+        for new_position in reloc: 
 
             # Expansion
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
 
-            # Check boundaries
+            
             if node_position[0] > (len(graph) - 1) or node_position[0] < 0 or node_position[1] > (len(graph[len(graph)-1]) -1) or node_position[1] < 0:
                 continue
 
-            # Make sure walkable terrain
+            #No obstacle codition
             if graph[node_position[0]][node_position[1]] != 0:
                 continue
 
-            # Create new node with its parent
+            # Possible expansions
             new_node = Node(current_node, node_position)
 
             # Append
             children.append(new_node)
 
-        # Loop through children
+        # Choose next step
         for child in children:
 
-            # Child is on the closed list
+            # Check visited or not
             skip = False
-            for closed_child in closed_list:
+            for closed_child in visited:
                 if child == closed_child:
                     skip= True
             if skip == True:
@@ -281,20 +317,25 @@ def A_star(graph, start, end):
 
             # Create the f, g, and h values
             child.g = current_node.g + 1
-            #Euclidean distance
-            child.h = ((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)
+            if distance == "Man":
+                #Manhattan distance
+                child.h = np.abs((child.position[0] - end_node.position[0])) + np.abs((child.position[1] - end_node.position[1]))
+            else:
+                #Euclidean distance
+                child.h = ((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)
+
             child.f = child.g + child.h
             
             skip = False
-            # Child is already in the open list
-            for open_node in open_list:
+            
+            for open_node in tovisit:
                 if child == open_node and child.g > open_node.g:
                     skip= True
             if skip == True:
                 continue
 
-            # Add the child to the open list
-            open_list.append(child)
+            
+            tovisit.append(child)
     return print("Path does not exist")
 
 
@@ -320,11 +361,10 @@ obstacle_graph =  graph_with_obstacles(10,20,40)
 
 start = (0, 0)
 end = (5, 5)
-path = A_star(obstacle_graph, start, end)
-
-obstacle_graph[0][4]
+path = A_star(obstacle_graph, start, end, "Man", strict=True)
 
 astar = []
+astar_man = []
 
 for _ in range(5):
     start = (np.random.randint(10), np.random.randint(20))
@@ -339,5 +379,85 @@ for _ in range(5):
     time_eval = t.timeit(1)
     astar.append(time_eval)
 
+    t = Timer(functools.partial(A_star,obstacle_graph,start,end,"Man"))  
+    time_eval = t.timeit(1)
+    astar_man.append(time_eval)
 
-print(astar)
+
+
+plt.plot(list(range(0,5)), astar, label = "A* Euclidean time")
+plt.plot(list(range(0,5)), astar_man, label = "A* Manhattan time")
+plt.legend()
+plt.title("A* time")
+plt.savefig('Plots/Astar.png')
+plt.show()
+
+print("Mannhattan AVG", np.mean(astar_man))
+print("Euc AVG", np.mean(astar))
+
+
+astar100 = []
+astar_man100 = []
+
+for _ in range(100):
+    start = (np.random.randint(10), np.random.randint(20))
+    end = (np.random.randint(10), np.random.randint(20))
+    while (start == end) or (obstacle_graph[start[0]][start[1]] == 1) or (obstacle_graph[end[0]][end[1]] == 1):
+        start = (np.random.randint(10), np.random.randint(20))
+        end = (np.random.randint(10), np.random.randint(20))
+
+    #print(start)
+    #print(end)
+    t = Timer(functools.partial(A_star,obstacle_graph,start,end))  
+    time_eval = t.timeit(1)
+    astar100.append(time_eval)
+
+    t = Timer(functools.partial(A_star,obstacle_graph,start,end,"Man"))  
+    time_eval = t.timeit(1)
+    astar_man100.append(time_eval)
+
+
+
+plt.plot(list(range(0,100)), astar100, label = "A* Euclidean time")
+plt.plot(list(range(0,100)), astar_man100, label = "A* Manhattan time")
+plt.legend()
+plt.title("A* time 100 iterations")
+plt.savefig('Plots/Astar100.png')
+plt.show()
+
+print("Mannhattan AVG 100", np.mean(astar_man100))
+print("Euc AVG 100", np.mean(astar100))
+
+
+
+astar100_strict = []
+astar_man100_strict = []
+
+for _ in range(20):
+    start = (np.random.randint(10), np.random.randint(20))
+    end = (np.random.randint(10), np.random.randint(20))
+    while (start == end) or (obstacle_graph[start[0]][start[1]] == 1) or (obstacle_graph[end[0]][end[1]] == 1):
+        start = (np.random.randint(10), np.random.randint(20))
+        end = (np.random.randint(10), np.random.randint(20))
+
+    #print(start)
+    #print(end)
+    t = Timer(functools.partial(A_star,obstacle_graph,start,end,strict = True))  
+    time_eval = t.timeit(1)
+    astar100_strict.append(time_eval)
+
+    t = Timer(functools.partial(A_star,obstacle_graph,start,end,"Man",strict = True))  
+    time_eval = t.timeit(1)
+    astar_man100_strict.append(time_eval)
+
+
+
+plt.plot(list(range(0,20)), astar100_strict, label = "A* Euclidean time")
+plt.plot(list(range(0,20)), astar_man100_strict, label = "A* Manhattan time")
+plt.legend()
+plt.title("A* time 100 iterations strict relocations")
+plt.savefig('Plots/Astar100_strict.png')
+plt.show()
+
+print("Mannhattan AVG 100_strict", np.mean(astar_man100_strict))
+print("Euc AVG 100_strict", np.mean(astar100_strict))
