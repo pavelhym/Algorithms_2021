@@ -7,7 +7,7 @@ from collections import defaultdict
 import copy
 
 
-
+#1
 def random_adjacency_matrix_weighted(V,E):
 
     matrix = np.zeros((V,V))
@@ -42,16 +42,12 @@ def convert_to_adjacency_weighted(adj_matrix):
     return graph
 
 
-
-
-
 adj_list = convert_to_adjacency_weighted(adj_matrix)
-
 adj_matrix_unweighted =  copy.deepcopy(adj_matrix)
 adj_matrix_unweighted[adj_matrix_unweighted>0] = 1
 
-#Graph
 
+#Graph
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
@@ -62,8 +58,6 @@ adj_sparse = sp.sparse.coo_matrix(adj_matrix_unweighted, dtype=np.int8)
 labels = range(0,100)
 DF_adj = pd.DataFrame(adj_sparse.toarray(),index=labels,columns=labels)
 print(DF_adj)
-
-
 
 #Network graph
 G = nx.Graph()
@@ -83,8 +77,6 @@ for i in range(DF_adj.shape[0]):
 nx.draw(G,with_labels = True)
 
 
-
- 
 class Graph(object):
     def __init__(self, nodes, graph):
         self.nodes = nodes
@@ -155,10 +147,6 @@ previous_nodes, shortest_path = dijkstra_algorithm(graph=graph_dijkstra, start_n
 
 
 
-
-
-
-
 def bellman_ford(graph, start_node):
    
     distance, previous_nodes = dict(), dict()
@@ -180,19 +168,14 @@ def bellman_ford(graph, start_node):
     return  previous_nodes, distance
 
 
+
+
 #Bellman_ford example
 distance, previous = bellman_ford(adj_list, start_node=0)
 
-
-
-
 #calculate time
-
 from timeit import Timer
 import functools
-
-
-
 
 iteration = list(range(0,10))
 dijkstra = []
@@ -209,7 +192,6 @@ for _ in range(10):
     ford.append(time_eval)
 
 
-
 plt.plot(iteration, dijkstra, label = "dijkstra")
 plt.plot(iteration, ford, label = 'bellman-ford')
 plt.legend()
@@ -221,7 +203,19 @@ print('AVG time for Dijkstra - ', np.mean(dijkstra))
 print('AVG time for Bellman Ford - ', np.mean(ford))
 
 
-#3
+
+
+
+
+
+
+
+
+
+
+
+
+#2
 #Astar
 class Node():
 
@@ -366,26 +360,23 @@ path = A_star(obstacle_graph, start, end)
 obstacle_graph_nost = copy.deepcopy(obstacle_graph)
 for i in path:
     obstacle_graph_nost[i] = 2
-
 plt.pcolormesh(obstacle_graph_nost , edgecolor = "black")
 
 
-#path without diagonals + plot
 
+#path without diagonals + plot
 path_str = A_star(obstacle_graph, start, end,strict=True)
 obstacle_graph_st = copy.deepcopy(obstacle_graph)
 for i in path_str:
     obstacle_graph_st[i] = 2
-
 plt.pcolormesh(obstacle_graph_st , edgecolor = "black")
 
 
 
-
+#for 5
 #For time evaluations
 astar = []
 astar_man = []
-
 for _ in range(5):
     start = (np.random.randint(10), np.random.randint(20))
     end = (np.random.randint(10), np.random.randint(20))
@@ -416,6 +407,7 @@ print("Mannhattan AVG", np.mean(astar_man))
 print("Euc AVG", np.mean(astar))
 
 
+#for 100
 astar100 = []
 astar_man100 = []
 
@@ -449,7 +441,7 @@ print("Mannhattan AVG 100", np.mean(astar_man100))
 print("Euc AVG 100", np.mean(astar100))
 
 
-
+#for 100 no diagonal
 astar100_strict = []
 astar_man100_strict = []
 
