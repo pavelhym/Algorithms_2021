@@ -83,6 +83,7 @@ for i in range(DF_adj.shape[0]):
 nx.draw(G,with_labels = True)
 
 
+
  
 class Graph(object):
     def __init__(self, nodes, graph):
@@ -147,7 +148,7 @@ def dijkstra_algorithm(graph, start_node):
 
 
 
-
+#dijkstra example
 nodes = list(range(0,100))
 graph_dijkstra = Graph(nodes, adj_list)
 previous_nodes, shortest_path = dijkstra_algorithm(graph=graph_dijkstra, start_node=0)
@@ -179,7 +180,8 @@ def bellman_ford(graph, start_node):
     return  previous_nodes, distance
 
 
-distance, predecessor = bellman_ford(adj_list, start_node=0)
+#Bellman_ford example
+distance, previous = bellman_ford(adj_list, start_node=0)
 
 
 
@@ -220,9 +222,7 @@ print('AVG time for Bellman Ford - ', np.mean(ford))
 
 
 #3
-
-
-#to store info on each node
+#Astar
 class Node():
 
     def __init__(self, parent=None, position=None):
@@ -355,14 +355,34 @@ def graph_with_obstacles(len,width,obstacles):
 
 obstacle_graph =  graph_with_obstacles(10,20,40)
 
+#plot of the grid
+plt.pcolormesh(obstacle_graph , edgecolor = "black")
 
 
-
-
+#path with diagonals + plot
 start = (0, 0)
-end = (5, 5)
-path = A_star(obstacle_graph, start, end, "Man", strict=True)
+end = (2, 6)
+path = A_star(obstacle_graph, start, end)
+obstacle_graph_nost = copy.deepcopy(obstacle_graph)
+for i in path:
+    obstacle_graph_nost[i] = 2
 
+plt.pcolormesh(obstacle_graph_nost , edgecolor = "black")
+
+
+#path without diagonals + plot
+
+path_str = A_star(obstacle_graph, start, end,strict=True)
+obstacle_graph_st = copy.deepcopy(obstacle_graph)
+for i in path_str:
+    obstacle_graph_st[i] = 2
+
+plt.pcolormesh(obstacle_graph_st , edgecolor = "black")
+
+
+
+
+#For time evaluations
 astar = []
 astar_man = []
 
