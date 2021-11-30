@@ -339,6 +339,9 @@ def Prim_list_to_edges(result_Prima_span):
 from FibHeap import FibHeapForPrims
 
 
+
+
+
 def prim_list_fheap(adj_list):
 	precursor = [None] * len(adj_list)
 	visited = set()
@@ -358,6 +361,7 @@ def prim_list_fheap(adj_list):
 				precursor[v] = u
 
 	return precursor
+
 
 
 
@@ -639,3 +643,199 @@ plt.plot(V_list_dense, prim_list_fib_theor_dense,label = "O(E + Vlog(V))")
 plt.legend()
 plt.title("Prim's dense list with fibonacci theoretical comparison") 
 plt.savefig('Plots\prim_list_fib_theor_big.png')
+
+
+
+import tracemalloc
+#space complexity
+
+
+
+V_list_space = []
+E_list_space = []
+krusk_space = []
+prim_matr_space = []
+prim_list_space = []
+prim_list_fib_space = []
+
+
+
+
+for V in range(10,501,10):
+    #E = int(V*(V-1)/2 -10)
+    E = V*3
+    V_list_space.append(V)
+    E_list_space.append(E)
+    krusk_temp = []
+    prim_matr_temp = []
+    prim_list_temp = []
+    prim_list_fib_temp = []
+    for i in range(0,5):
+        adj_matrix =  random_connected_weighted_graph(V,E)
+        adj_list =  convert_to_adjacency_weighted(adj_matrix)
+        edge_list =  convert_to_edges(adj_matrix)
+
+        tracemalloc.start()
+        Kruskal(edge_list, V, E)
+        time_eval = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        krusk_temp.append(time_eval)
+
+        tracemalloc.start()
+        primMST(adj_matrix)
+        time_eval = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        prim_matr_temp.append(time_eval)
+
+        tracemalloc.start()
+        prim_list_heap(adj_list, 0)
+        time_eval = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        prim_list_temp.append(time_eval)
+
+        tracemalloc.start()
+        prim_list_fheap(adj_list) 
+        time_eval = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        prim_list_fib_temp.append(time_eval)
+    
+    krusk_space.append(np.mean(krusk_temp))
+    prim_matr_space.append(np.mean(prim_matr_temp))
+    prim_list_space.append(np.mean(prim_list_temp))
+    prim_list_fib_space.append(np.mean(prim_list_fib_temp))
+
+
+
+
+
+
+plt.plot(V_list_space, krusk_space, label = "kurs")
+plt.plot(V_list_space, prim_matr_space, label = 'prim matr')
+plt.plot(V_list_space, prim_list_space, label = 'prim list')
+plt.plot(V_list_space, prim_list_fib_space, label = 'prim Fibbonaci')
+plt.legend()
+plt.title("Comparison on graph with small number of edges")
+#plt.savefig('Plots\small_comparison.png')
+
+
+
+
+
+
+
+V_list_dense_space = []
+E_list_dense_space = []
+krusk_dense_space = []
+prim_matr_dense_space = []
+prim_list_dense_space = []
+prim_list_fib_dense_space = []
+
+
+
+for V in range(10,260,10):
+    E = int(V*(V-1)/2)
+    #E = V*3
+    V_list_dense_space.append(V)
+    E_list_dense_space.append(E)
+    krusk_temp = []
+    prim_matr_temp = []
+    prim_list_temp = []
+    prim_list_fib_temp = []
+    for i in range(0,5):
+        adj_matrix =  random_connected_weighted_graph(V,E)
+        adj_list =  convert_to_adjacency_weighted(adj_matrix)
+        edge_list =  convert_to_edges(adj_matrix)
+
+        tracemalloc.start()
+        Kruskal(edge_list, V, E)
+        time_eval = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        krusk_temp.append(time_eval)
+
+        tracemalloc.start()
+        primMST(adj_matrix)
+        time_eval = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        prim_matr_temp.append(time_eval)
+
+        tracemalloc.start()
+        prim_list_heap(adj_list, 0)
+        time_eval = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        prim_list_temp.append(time_eval)
+
+        tracemalloc.start()
+        prim_list_fheap(adj_list) 
+        time_eval = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        prim_list_fib_temp.append(time_eval)
+    
+    krusk_dense_space.append(np.mean(krusk_temp))
+    prim_matr_dense_space.append(np.mean(prim_matr_temp))
+    prim_list_dense_space.append(np.mean(prim_list_temp))
+    prim_list_fib_dense_space.append(np.mean(prim_list_fib_temp))
+
+
+plt.plot(V_list_dense_space, krusk_dense_space, label = "kurs")
+plt.plot(V_list_dense_space, prim_matr_dense_space, label = 'prim matr')
+plt.plot(V_list_dense_space, prim_list_dense_space, label = 'prim list')
+plt.plot(V_list_dense_space, prim_list_fib_dense_space, label = 'prim Fibbonaci')
+plt.legend()
+plt.title("Comparison of space complexities")
+plt.savefig('Plots\space.png')
+
+V_list_dense_space[-1]
+E_list_dense_space[-1]
+
+#Kruskal
+
+krusk_dense_space_theor = []
+for V in range(10,260,10):
+    E = int(V*(V-1)/2)
+    krusk_dense_space_theor.append((krusk_dense_space[-1]/(V_list_dense_space[-1] + E_list_dense_space[-1])*(V+E)))
+
+plt.plot(V_list_dense_space, krusk_dense_space_theor,label = "O(V+E)", linewidth=10, alpha=0.5)
+plt.plot(V_list_dense_space, krusk_dense_space, label = "Kruskal")
+plt.legend()
+plt.title("Kruskal space complexity theoretical comparison") 
+plt.savefig('Plots\krusk_space.png')
+
+#Prim list
+prim_list_dense_space_theor = []
+for V in range(10,260,10):
+    E = int(V*(V-1)/2)
+    prim_list_dense_space_theor.append((prim_list_dense_space[-1]/(V_list_dense_space[-1] + E_list_dense_space[-1])*(V+E)))
+
+plt.plot(V_list_dense_space, prim_list_dense_space_theor,label = "O(V+E)", linewidth=10, alpha=0.5)
+plt.plot(V_list_dense_space, prim_list_dense_space, label = "Prim's")
+plt.legend()
+plt.title("Prim's list space complexity theoretical comparison") 
+plt.savefig('Plots\prim_list_space.png')
+
+
+
+#Prim matr
+prim_matr_dense_space_theor = []
+for V in range(10,260,10):
+    E = int(V*(V-1)/2)
+    prim_matr_dense_space_theor.append((prim_matr_dense_space[-1]/(V_list_dense_space[-1])*(V)))
+
+plt.plot(V_list_dense_space, prim_matr_dense_space_theor,label = "O(V)", linewidth=10, alpha=0.5)
+plt.plot(V_list_dense_space, prim_matr_dense_space, label = "Prim's")
+plt.legend()
+plt.title("Prim's matrix space complexity theoretical comparison") 
+plt.savefig('Plots\prim_matr_space.png')
+
+
+
+#Prim Fib
+prim_list_fib_dense_space_theor = []
+for V in range(10,260,10):
+    E = int(V*(V-1)/2)
+    prim_list_fib_dense_space_theor.append((prim_list_fib_dense_space[-1]/(V_list_dense_space[-1])*(V)))
+
+plt.plot(V_list_dense_space, prim_list_fib_dense_space_theor,label = "O(V)", linewidth=10, alpha=0.5)
+plt.plot(V_list_dense_space, prim_list_fib_dense_space, label = "Prim's")
+plt.legend()
+plt.title("Prim's fibonacci space complexity theoretical comparison") 
+plt.savefig('Plots\prim_fib_space.png')
